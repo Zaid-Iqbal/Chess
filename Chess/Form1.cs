@@ -692,17 +692,20 @@ namespace Chess
                 selected = null;
                 foreach (Piece piece in pieces)
                 {
-                    if (piece.x == e.ColumnIndex && piece.y == e.RowIndex && preventCheck(piece).name == "")
+                    if (piece.color == (turn ? Color.White : Color.Black))
                     {
-                        highlightSpaces(piece, check[(piece.color == Color.White) ? 0 : 1]);
-                        selected = piece;
-                        break;
-                    }
-                    else if (piece.x == e.ColumnIndex && piece.y == e.RowIndex && preventCheck(piece).name != "")
-                    {
-                        highlightSpaces(piece, false);
-                        selected = piece;
-                        break;
+                        if (piece.x == e.ColumnIndex && piece.y == e.RowIndex && preventCheck(piece).name == "")
+                        {
+                            highlightSpaces(piece, check[(piece.color == Color.White) ? 0 : 1]);
+                            selected = piece;
+                            break;
+                        }
+                        else if (piece.x == e.ColumnIndex && piece.y == e.RowIndex && preventCheck(piece).name != "")
+                        {
+                            highlightSpaces(piece, false);
+                            selected = piece;
+                            break;
+                        }
                     }
                 }
             }
@@ -738,6 +741,36 @@ namespace Chess
             }
 
             return col + row;
+        }
+
+        /// <summary>
+        /// Checks if there is a stalemate
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public bool checkStale(Color color)
+        {
+            foreach (Piece piece in pieces)
+            {
+                if (piece.color == color)
+                {
+                    highlightSpaces(piece, false);
+                }
+            }
+
+            foreach (DataGridViewRow row in board.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Style.BackColor == Color.Blue || cell.Style.BackColor == Color.Red || cell.Style.BackColor == Color.Green || cell.Style.BackColor == Color.Purple)
+                    {
+                        ogColor();
+                        return false;
+                    }
+                }
+            }
+            ogColor();
+            return true;
         }
 
         /// <summary>
@@ -821,7 +854,14 @@ namespace Chess
         public void endGame(Color winner)
         {
             gameEnd = true;
-            winnerLabel.Text = "Winner:" + (winner == Color.White ? "White":"Black");
+            if (winner == Color.Yellow)
+            {
+                winnerLabel.Text = "Winner: Stalemate";
+            }
+            else
+            {
+                winnerLabel.Text = "Winner:" + (winner == Color.White ? "White" : "Black");
+            }
             winnerLabel.Show();
         }
 
@@ -1782,6 +1822,41 @@ namespace Chess
                 }
             }
         }
+
+        /// <summary>
+        /// recolors a specific tile back to its original color
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void ogColor(int x, int y)
+        {
+            if ((y % 2) + 1 == 1)
+            {
+                if ((x % 2) + 1 == 1)
+                {
+                    board.Rows[y].Cells[x].Style.BackColor = Color.White;
+                    //MessageBox.Show(cell.RowIndex + "," + cell.ColumnIndex + " : changed to white");
+                }
+                else
+                {
+                    board.Rows[y].Cells[x].Style.BackColor = Color.Gray;
+                    //MessageBox.Show(cell.RowIndex + "," + cell.ColumnIndex + " : changed to grey");
+                }
+            }
+            else
+            {
+                if ((x % 2) + 1 == 1)
+                {
+                    board.Rows[y].Cells[x].Style.BackColor = Color.Gray;
+                    //MessageBox.Show(cell.RowIndex + "," + cell.ColumnIndex + " : changed to grey");
+                }
+                else
+                {
+                    board.Rows[y].Cells[x].Style.BackColor = Color.White;
+                    //MessageBox.Show(cell.RowIndex + "," + cell.ColumnIndex + " : changed to white");
+                }
+            }
+        }
         
         /// <summary>
         /// Highlight the spaces the piece can move to
@@ -1823,6 +1898,37 @@ namespace Chess
                     if (y - 1 == 0 && x - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1) && !checkForACheck(piece, x - 1, y - 1, false))
                     {
                         board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Purple;
+                    }
+                }
+                else if (piece.name == "pawn" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                {
+                    if (x + 1 < 8 && y + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 1) && !checkForACheck(piece, x + 1, y + 1, true))
+                    {
+                        board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Red;
+                    }
+                    if (x - 1 > -1 && y + 1 < 8 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 1) && !checkForACheck(piece, x - 1, y + 1, true))
+                    {
+                        board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Red;
+                    }
+                    if (y + 1 < 8 && board.Rows[y + 1].Cells[x].Value == null && !checkForACheck(piece, x, y + 1, false))
+                    {
+                        board.Rows[y + 1].Cells[x].Style.BackColor = Color.Blue;
+                    }
+                    if (y == 1 && y+2 < 8 && board.Rows[y + 2].Cells[x].Value == null && !checkForACheck(piece, x, y + 2, false))
+                    {
+                        board.Rows[y + 2].Cells[x].Style.BackColor = Color.Blue;
+                    }
+                    if (y + 1 < 8 && board.Rows[y + 1].Cells[x].Value == null && !checkForACheck(piece, x, y + 1, false))
+                    {
+                        board.Rows[y + 1].Cells[x].Style.BackColor = Color.Purple;
+                    }
+                    if (y + 1 < 8 && x - 1 > -1 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 1) && !checkForACheck(piece, x - 1, y + 1, false))
+                    {
+                        board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Purple;
+                    }
+                    if (y + 1 < 8 && x + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 1) && !checkForACheck(piece, x + 1, y + 1, false))
+                    {
+                        board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Purple;
                     }
                 }
                 else if (piece.name == "rook" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
@@ -3850,8 +3956,25 @@ namespace Chess
                     }
                 }
             }
-        }
 
+            foreach (DataGridViewRow row in board.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Style.BackColor == Color.Blue)
+                    {
+                        foreach (Piece findPiece in pieces)
+                        {
+                            if (findPiece.x == cell.ColumnIndex && findPiece.y == cell.RowIndex)
+                            {
+                                //just change it to anythign other than blue so the algorithm doesnt get confused. It'll all get sorted out when ogColors() is called later
+                                ogColor(cell.ColumnIndex,cell.RowIndex);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Highlight the spaces the piece can move to
@@ -5865,6 +5988,13 @@ namespace Chess
         /// <returns></returns>
         public bool checkForACheck(Piece piece, int newx, int newy, bool killed)
         {
+            List<Piece> testPieces = new List<Piece>();
+            //hard copy of pieces
+            foreach (Piece copy in pieces)
+            {
+                testPieces.Add(copy);
+            }
+
             //stores all the already highlighted spaces
             //int[2] = 0 is blue
             //int[2] = 1 is red
@@ -5906,7 +6036,7 @@ namespace Chess
             if (killed)
             {
                 //see if that spot would be a kill
-                foreach (Piece found in pieces)
+                foreach (Piece found in testPieces)
                 {
                     if (found != piece && found.x == newx && found.y == newy)
                     {
@@ -5915,12 +6045,12 @@ namespace Chess
                 }
                 if (kill.x != -1)
                 {
-                    pieces.Remove(kill);
+                    testPieces.Remove(kill);
                 }
             }
 
             //highlights all spaces
-            foreach (Piece check in pieces)
+            foreach (Piece check in testPieces)
             {
                 if (check.color != piece.color)
                 {
@@ -5930,7 +6060,7 @@ namespace Chess
 
             //find the king 
             Piece king = new Piece();
-            foreach (Piece findKing in pieces)
+            foreach (Piece findKing in testPieces)
             {
                 if (findKing.name == "king" && findKing.color == piece.color)
                 {
@@ -5956,7 +6086,7 @@ namespace Chess
             board.Rows[newy].Cells[newx].Value = null;
             if (kill.x != -1)
             {
-                pieces.Add(kill);
+                testPieces.Add(kill);
                 board.Rows[kill.y].Cells[kill.x].Value = kill.icon;
             }
             piece.x = oldx;
@@ -6020,6 +6150,11 @@ namespace Chess
             {
                 whiteTimer.Start();
                 blackTimer.Stop();
+            }
+
+            if (checkStale(Color.White) || checkStale(Color.Black))
+            {
+                endGame(Color.Yellow);
             }
 
             drawLabel.Hide();
