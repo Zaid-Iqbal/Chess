@@ -178,7 +178,7 @@
             // 
             this.winnerLabel.AutoSize = true;
             this.winnerLabel.Font = new System.Drawing.Font("Comic Sans MS", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.winnerLabel.Location = new System.Drawing.Point(621, 455);
+            this.winnerLabel.Location = new System.Drawing.Point(621, 466);
             this.winnerLabel.Name = "winnerLabel";
             this.winnerLabel.Size = new System.Drawing.Size(111, 33);
             this.winnerLabel.TabIndex = 3;
@@ -188,7 +188,7 @@
             // 
             this.checkLabel.AutoSize = true;
             this.checkLabel.Font = new System.Drawing.Font("Comic Sans MS", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.checkLabel.Location = new System.Drawing.Point(621, 422);
+            this.checkLabel.Location = new System.Drawing.Point(621, 433);
             this.checkLabel.Name = "checkLabel";
             this.checkLabel.Size = new System.Drawing.Size(129, 33);
             this.checkLabel.TabIndex = 4;
@@ -269,7 +269,7 @@
             // 
             this.drawLabel.AutoSize = true;
             this.drawLabel.Font = new System.Drawing.Font("Comic Sans MS", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.drawLabel.Location = new System.Drawing.Point(624, 271);
+            this.drawLabel.Location = new System.Drawing.Point(621, 398);
             this.drawLabel.Name = "drawLabel";
             this.drawLabel.Size = new System.Drawing.Size(169, 33);
             this.drawLabel.TabIndex = 13;
@@ -277,7 +277,7 @@
             // 
             // drawButton
             // 
-            this.drawButton.Location = new System.Drawing.Point(799, 281);
+            this.drawButton.Location = new System.Drawing.Point(796, 408);
             this.drawButton.Name = "drawButton";
             this.drawButton.Size = new System.Drawing.Size(75, 23);
             this.drawButton.TabIndex = 14;

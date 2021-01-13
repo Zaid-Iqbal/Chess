@@ -5838,7 +5838,7 @@ namespace Chess
         }
 
         /// <summary>
-        /// checks the check tiles
+        /// checks the check tiles (USED FOR DEBUGGING)
         /// </summary>
         /// <param name="checkTiles"></param>
         /// <param name="x"></param>
@@ -6810,9 +6810,17 @@ namespace Chess
 
         private void offerADrawToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            changeTurn();
-            drawLabel.Show();
-            drawButton.Show();
+            if (gameEnd)
+            {
+                return;
+            }
+            else
+            {
+                changeTurn();
+                drawLabel.Show();
+                drawButton.Show();
+            }
+
         }
 
         private void drawButton_Click(object sender, EventArgs e)
@@ -6838,14 +6846,28 @@ namespace Chess
 
         private void resignButton_Click(object sender, EventArgs e)
         {
-            endGame(turn ? Color.Black : Color.White);
+            if (gameEnd)
+            {
+                return;
+            }
+            else
+            {
+                endGame(turn ? Color.Black : Color.White);
+            }
         }
 
         private void offerDrawButton_Click(object sender, EventArgs e)
         {
-            changeTurn();
-            drawLabel.Show();
-            drawButton.Show();
+            if (gameEnd)
+            {
+                return;
+            }
+            else
+            {
+                changeTurn();
+                drawLabel.Show();
+                drawButton.Show();
+            }
         }
 
         #region accidents
