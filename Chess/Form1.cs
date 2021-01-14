@@ -36,6 +36,16 @@ namespace Chess
         bool timing = false;
 
         /// <summary>
+        /// Stores the last move
+        /// </summary>
+        String[] lastMove = new string[4];
+
+        /// <summary>
+        /// turns true if en Passant is selected
+        /// </summary>
+        bool enPassant = false;
+
+        /// <summary>
         /// selected piece
         /// </summary>
         static Piece selected;
@@ -215,6 +225,18 @@ namespace Chess
                         if ((piece.color == Color.White && !check[0]) || (piece.color == Color.Black && !check[1]))
                         {
                             int checkd = 0;
+                            //check for double move for en pessant
+                            lastMove[0] = piece.name;
+                            if (piece.name == "pawn" && piece.y - e.RowIndex == 2)
+                            {
+                                lastMove[1] = "double move";
+                            }
+                            else
+                            {
+                                lastMove[1] = "move";
+                            }
+                            lastMove[2] = e.ColumnIndex.ToString();
+                            lastMove[3] = e.RowIndex.ToString();
                             board.Rows[piece.y].Cells[piece.x].Value = null;
                             piece.x = e.ColumnIndex;
                             piece.y = e.RowIndex;
@@ -278,6 +300,17 @@ namespace Chess
                         else if ((piece.color == Color.White && check[0]) || (piece.color == Color.Black && check[1]))
                         {
                             int checkd = 0;
+                            lastMove[0] = piece.name;
+                            if (piece.name == "pawn" && piece.y - e.RowIndex == 2)
+                            {
+                                lastMove[1] = "double move";
+                            }
+                            else
+                            {
+                                lastMove[1] = "move";
+                            }
+                            lastMove[2] = e.ColumnIndex.ToString();
+                            lastMove[3] = e.RowIndex.ToString();
                             board.Rows[piece.y].Cells[piece.x].Value = null;
                             piece.x = e.ColumnIndex;
                             piece.y = e.RowIndex;
@@ -350,27 +383,39 @@ namespace Chess
             else if (board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Red)
             {
                 Piece remove = new Piece();
-
                 //finds the peice beign removed
-                foreach (Piece piece in pieces)
+                if (enPassant)
                 {
-                    if (e.ColumnIndex == piece.x && e.RowIndex == piece.y)
+                    foreach (Piece piece in pieces)
                     {
-                        remove = piece;
-                        break;
+                        if (e.ColumnIndex == piece.x && e.RowIndex == piece.y - 1)
+                        {
+                            remove = piece;
+                            break;
+                        }
                     }
+                    enPassant = false;
                 }
-                if (remove.x == -1 || remove.y == -1)
+                else
                 {
-                    MessageBox.Show("Error 1: x or y coordinate to remove is blank;");
-                    return;
+                    foreach (Piece piece in pieces)
+                    {
+                        if (e.ColumnIndex == piece.x && e.RowIndex == piece.y)
+                        {
+                            remove = piece;
+                            break;
+                        }
+                    }
                 }
 
                 foreach (Piece piece in pieces)
                 {
                     if (selected.x == piece.x && selected.y == piece.y && (preventCheck(piece).name == "" || (preventCheck(piece).name != "" && !checkForACheck(piece,remove.x,remove.y,true))))
                     {
-
+                        lastMove[0] = piece.name;
+                        lastMove[1] = "kill";
+                        lastMove[2] = e.ColumnIndex.ToString();
+                        lastMove[3] = e.RowIndex.ToString();
                         board.Rows[remove.y].Cells[remove.x].Value = null;
                         pieces.Remove(remove);
 
@@ -382,6 +427,7 @@ namespace Chess
 
                         piece.moved = true;
 
+                        enPassant = false;
                         //if the piece is not in currently in check
                         if ((piece.color == Color.White && !check[0]) || (piece.color == Color.Black && !check[1]))
                         {
@@ -538,6 +584,10 @@ namespace Chess
                     {
                         if (rook.color == Color.White)
                         {
+                            lastMove[0] = king.name;
+                            lastMove[1] = "castle";
+                            lastMove[2] = king.x.ToString();
+                            lastMove[3] = king.y.ToString(); 
                             board.Rows[king.y].Cells[king.x].Value = null;
                             board.Rows[rook.y].Cells[rook.x].Value = null;
                             board.Rows[king.y].Cells[king.x + 2].Value = king.icon;
@@ -548,7 +598,10 @@ namespace Chess
                         }
                         else
                         {
-                            board.Rows[king.y].Cells[king.x].Value = null;
+                            lastMove[0] = king.name;
+                            lastMove[1] = "castle";
+                            lastMove[2] = king.x.ToString();
+                            lastMove[3] = king.y.ToString(); board.Rows[king.y].Cells[king.x].Value = null;
                             board.Rows[rook.y].Cells[rook.x].Value = null;
                             board.Rows[king.y].Cells[king.x - 2].Value = king.icon;
                             board.Rows[rook.y].Cells[rook.x + 2].Value = rook.icon;
@@ -561,7 +614,10 @@ namespace Chess
                     {
                         if (rook.color == Color.White)
                         {
-                            board.Rows[king.y].Cells[king.x].Value = null;
+                            lastMove[0] = king.name;
+                            lastMove[1] = "castle";
+                            lastMove[2] = king.x.ToString();
+                            lastMove[3] = king.y.ToString(); board.Rows[king.y].Cells[king.x].Value = null;
                             board.Rows[rook.y].Cells[rook.x].Value = null;
                             board.Rows[king.y].Cells[king.x + 2].Value = king.icon;
                             board.Rows[rook.y].Cells[rook.x - 3].Value = rook.icon;
@@ -572,7 +628,10 @@ namespace Chess
                         }
                         else
                         {
-                            board.Rows[king.y].Cells[king.x].Value = null;
+                            lastMove[0] = king.name;
+                            lastMove[1] = "castle";
+                            lastMove[2] = king.x.ToString();
+                            lastMove[3] = king.y.ToString(); board.Rows[king.y].Cells[king.x].Value = null;
                             board.Rows[rook.y].Cells[rook.x].Value = null;
                             board.Rows[king.y].Cells[king.x - 2].Value = king.icon;
                             board.Rows[rook.y].Cells[rook.x + 3].Value = rook.icon;
@@ -586,6 +645,7 @@ namespace Chess
                 ogColor();
                 changeTurn();
             }
+            //Promotion //TODO Add support for other piece options
             else if(board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Purple)
             {
                 foreach (Piece piece in pieces)
@@ -619,6 +679,10 @@ namespace Chess
                         }
 
                         int checkd = 0;
+                        lastMove[0] = piece.name;
+                        lastMove[1] = "promotion";
+                        lastMove[2] = e.ColumnIndex.ToString();
+                        lastMove[3] = e.RowIndex.ToString(); 
                         board.Rows[piece.y].Cells[piece.x].Value = null;
                         piece.x = e.ColumnIndex;
                         piece.y = e.RowIndex;
@@ -681,6 +745,7 @@ namespace Chess
                     }
                 }
             }
+            //Just an empty if to handle accidentally clicking on an empty cell
             else if (board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value == null)
             {
 
@@ -1042,7 +1107,7 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
-                                break;//TODO try to remove these breaks cuz king is moving to spots that keep check
+                                break;
                             }
                             else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
                             {
@@ -1871,30 +1936,59 @@ namespace Chess
                 int y = piece.y;
                 if (piece.name == "pawn" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
                 {
+                    //left kill
                     if (x - 1 != -1 && y - 1 != -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1) && !checkForACheck(piece, x - 1, y - 1,true))
                     {
                         board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
                     }
+
+                    //right kill
                     if (x + 1 != 8 && y - 1 != -1 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y - 1) && !checkForACheck(piece,x+1,y-1,true))
                     {
                         board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
                     }
+
+                    //left en Passant
+                    if (x - 1 > -1 && y - 1 > -1 && board.Rows[y].Cells[x - 1].Value != null && board.Rows[y - 1].Cells[x - 1].Value == null && containsEnemy(piece.color, x - 1, y) && !checkForACheck(piece, x - 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x - 1 && int.Parse(lastMove[3]) == y)
+                    {
+                        board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
+                        //board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.FromArgb(255,1,1);
+                        enPassant = true;
+                    }
+
+                    //right en Passant
+                    if (x + 1 < 8 && y - 1 > -1 && board.Rows[y].Cells[x + 1].Value != null && board.Rows[y - 1].Cells[x + 1].Value == null && containsEnemy(piece.color, x + 1, y) && !checkForACheck(piece, x + 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x + 1 && int.Parse(lastMove[3]) == y)
+                    {
+                        board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
+                        //board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.FromArgb(255, 1, 1);
+                        enPassant = true;
+                    }
+
+                    //move 
                     if (y - 1 != -1 && board.Rows[y - 1].Cells[x].Value == null && !checkForACheck(piece, x, y - 1,false))
                     {
                         board.Rows[y - 1].Cells[x].Style.BackColor = Color.Blue;
                     }
+
+                    //double move
                     if (y == 6 && board.Rows[y - 2].Cells[x].Value == null && !checkForACheck(piece, x, y - 2,false))
                     {
                         board.Rows[y - 2].Cells[x].Style.BackColor = Color.Blue;
                     }
+
+                    //promotion
                     if (y-1 == 0 && board.Rows[y - 1].Cells[x].Value == null && !checkForACheck(piece, x, y - 1,false))
                     {
                         board.Rows[y - 1].Cells[x].Style.BackColor = Color.Purple;
                     }
+
+                    //promotion & kill right
                     if (y - 1 == 0 && x + 1 < 8 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.color,x + 1,y - 1) && !checkForACheck(piece, x + 1, y - 1, false))
                     {
                         board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Purple;
                     }
+
+                    //promotion & kill right
                     if (y - 1 == 0 && x - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1) && !checkForACheck(piece, x - 1, y - 1, false))
                     {
                         board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Purple;
@@ -3225,6 +3319,34 @@ namespace Chess
                             if (tile[0] == newx && tile[1] == newy)
                             {
                                 board.Rows[newy].Cells[newx].Style.BackColor = Color.Red;
+                                break;
+                            }
+                        }
+                    }
+
+                    //left en Passant
+                    if (x - 1 > -1 && y - 1 > -1 && board.Rows[y].Cells[x - 1].Value != null && board.Rows[y - 1].Cells[x - 1].Value == null && containsEnemy(piece.color, x - 1, y) && !checkForACheck(piece, x - 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x - 1 && int.Parse(lastMove[3]) == y)
+                    {
+                        foreach (int[] tile in threats)
+                        {
+                            if (tile[0] == x - 1 && tile[1] == y)
+                            {
+                                board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
+                                enPassant = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    //right en Passant
+                    if (x + 1 < 8 && y - 1 > -1 && board.Rows[y].Cells[x + 1].Value != null && board.Rows[y - 1].Cells[x + 1].Value == null && containsEnemy(piece.color, x + 1, y) && !checkForACheck(piece, x + 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x + 1 && int.Parse(lastMove[3]) == y)
+                    {
+                        foreach (int[] tile in threats)
+                        {
+                            if (tile[0] == x + 1 && tile[1] == y - 1)
+                            {
+                                board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
+                                enPassant = true;
                                 break;
                             }
                         }
@@ -6784,6 +6906,8 @@ namespace Chess
         /// </summary>
         public void flipBoard()
         {
+            lastMove[2] = (7 - int.Parse(lastMove[2])).ToString();
+            lastMove[3] = (7 - int.Parse(lastMove[3])).ToString();
             foreach (Piece piece in pieces)
             {
                 piece.x = 7 - piece.x;
@@ -6869,6 +6993,8 @@ namespace Chess
                 }
             }
         }
+
+
 
         private void startButton_Click(object sender, EventArgs e)
         {

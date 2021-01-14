@@ -10,7 +10,6 @@ namespace Chess
     public class Piece
     {
         public String name { get; set; }
-
         public Color color { get;}
         public Image icon { get; set; }
         public int x { get; set; }
