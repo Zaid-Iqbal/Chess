@@ -1,3 +1,21 @@
+Chess
+
+Features
+1. 2 people can play chess against each other
+2. All possible moves for each piece is shown when the piece is clicked
+3. If your side is in check, only moves that stop the check are shown
+4. When there are no such moves from #3, checkmate is declared
+5. When there are no possible moves but the king is not in check, stalemete is declared
+6. Supports special moves like casle, en passant, and promotion (only promotion to Queen is supported. Unable to promote pawn to rook, knight, or bishop. Support for different promotions coming soon)
+
+Color Guide
+Blue = Move
+Red = Kill
+Green = Castle
+Purple = Promotion
+
+En Passant note: When an en passant is possible, the tile above the pawn to be killed will turn red. Click that red tile to perform the en passant. Clicking on the pawn to be killed direclty will not kill the pawn
+
 Click the link below to download the program and play yourself
 
-https://www.dropbox.com/s/fiuf2z0r4sjv1r2/Chess.zip?dl=0
+https://www.dropbox.com/s/1j6lcwivtjco2kr/Chess.zip?dl=0
