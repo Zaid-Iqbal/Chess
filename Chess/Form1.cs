@@ -19,6 +19,7 @@ namespace Chess
         /// list of pieces
         /// </summary>
         static List<Piece> pieces = new List<Piece>();
+        //static Dictionary<(int, int), Piece> pieces = new Dictionary<(int, int), Piece>();
 
         /// <summary>
         /// checks if the game is over. If true, no more moves are accepted and you can stare at the board and marvel at how badly you suck at chess
@@ -73,7 +74,7 @@ namespace Chess
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            #region ADD PIECES TO ARRAY
+            #region ADD PIECES TO DICTIONARY
             pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 0, 6));
             pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 1, 6));
             pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 2, 6));
