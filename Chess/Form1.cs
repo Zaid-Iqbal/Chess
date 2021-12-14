@@ -18,8 +18,8 @@ namespace Chess
         /// <summary>
         /// list of pieces
         /// </summary>
-        static List<Piece> pieces = new List<Piece>();
-        //static Dictionary<(int, int), Piece> pieces = new Dictionary<(int, int), Piece>();
+        static List<Piece> Pieces = new List<Piece>();
+
 
         /// <summary>
         /// checks if the game is over. If true, no more moves are accepted and you can stare at the board and marvel at how badly you suck at chess
@@ -37,14 +37,16 @@ namespace Chess
         bool timing = false;
 
         /// <summary>
-        /// Stores the last move
+        /// If the last move was a pawn, save its coords
+        /// 2 = X
+        /// 3 = Y
         /// </summary>
-        String[] lastMove = new string[4];
+        (int, int) lastMove = (-1,-1);
 
         /// <summary>
         /// turns true if en Passant is selected
         /// </summary>
-        bool enPassant = false;
+        bool doubleMove = false;
 
         /// <summary>
         /// selected piece
@@ -56,6 +58,8 @@ namespace Chess
         /// 1 = checkmate for black
         /// </summary>
         static bool[] check = { false, false };
+        static bool WhiteCheck = false;
+        static bool BlackCheck = false;
 
         /// <summary>
         /// true = white's turn
@@ -75,47 +79,47 @@ namespace Chess
         private void Form1_Load(object sender, EventArgs e)
         {
             #region ADD PIECES TO DICTIONARY
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 0, 6));
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 1, 6));
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 2, 6));
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 3, 6));
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 4, 6));
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 5, 6));
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 6, 6));
-            pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 7, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 0, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 1, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 2, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 3, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 4, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 5, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 6, 6));
+            Pieces.Add(new Piece("pawn", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wpawn.png"), 7, 6));
 
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 0, 1));
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 1, 1));
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 2, 1));
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 3, 1));
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 4, 1));
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 5, 1));
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 6, 1));
-            pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 7, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 0, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 1, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 2, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 3, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 4, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 5, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 6, 1));
+            Pieces.Add(new Piece("pawn", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bpawn.png"), 7, 1));
 
-            pieces.Add(new Piece("rook", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wrook.png"), 0, 7));
-            pieces.Add(new Piece("rook", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wrook.png"), 7, 7));
+            Pieces.Add(new Piece("rook", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wrook.png"), 0, 7));
+            Pieces.Add(new Piece("rook", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wrook.png"), 7, 7));
 
-            pieces.Add(new Piece("rook", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Brook.png"), 0, 0));
-            pieces.Add(new Piece("rook", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Brook.png"), 7, 0));
+            Pieces.Add(new Piece("rook", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Brook.png"), 0, 0));
+            Pieces.Add(new Piece("rook", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Brook.png"), 7, 0));
 
-            pieces.Add(new Piece("horse", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Whorse.png"), 1, 7));
-            pieces.Add(new Piece("horse", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Whorse.png"), 6, 7));
+            Pieces.Add(new Piece("horse", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Whorse.png"), 1, 7));
+            Pieces.Add(new Piece("horse", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Whorse.png"), 6, 7));
 
-            pieces.Add(new Piece("horse", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bhorse.png"), 1, 0));
-            pieces.Add(new Piece("horse", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bhorse.png"), 6, 0));
+            Pieces.Add(new Piece("horse", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bhorse.png"), 1, 0));
+            Pieces.Add(new Piece("horse", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bhorse.png"), 6, 0));
 
-            pieces.Add(new Piece("bishop", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wbishop.png"), 2, 7));
-            pieces.Add(new Piece("bishop", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wbishop.png"), 5, 7));
+            Pieces.Add(new Piece("bishop", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wbishop.png"), 2, 7));
+            Pieces.Add(new Piece("bishop", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wbishop.png"), 5, 7));
 
-            pieces.Add(new Piece("bishop", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bbishop.png"), 2, 0));
-            pieces.Add(new Piece("bishop", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bbishop.png"), 5, 0));
+            Pieces.Add(new Piece("bishop", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bbishop.png"), 2, 0));
+            Pieces.Add(new Piece("bishop", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bbishop.png"), 5, 0));
 
-            pieces.Add(new Piece("queen", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wqueen.png"), 3, 7));
-            pieces.Add(new Piece("queen", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bqueen.png"), 3, 0));
+            Pieces.Add(new Piece("queen", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wqueen.png"), 3, 7));
+            Pieces.Add(new Piece("queen", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bqueen.png"), 3, 0));
 
-            pieces.Add(new Piece("king", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wking.png"), 4, 7));
-            pieces.Add(new Piece("king", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bking.png"), 4, 0));
+            Pieces.Add(new Piece("king", Color.White, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wking.png"), 4, 7));
+            Pieces.Add(new Piece("king", Color.Black, Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bking.png"), 4, 0));
             #endregion
 
             #region FORMAT COLUMNS
@@ -182,9 +186,9 @@ namespace Chess
 
             #region ADD PIECES
             //add black pawns
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in Pieces)
             {
-                board.Rows[piece.y].Cells[piece.x].Value = piece.icon;
+                board.Rows[piece.Y].Cells[piece.X].Value = piece.Icon;
             }
             #endregion
 
@@ -217,277 +221,235 @@ namespace Chess
             //move a piece if the board is highlighted
             if (board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Blue)
             {
-                foreach (Piece piece in pieces)
+                //if the piece is not in currently in check
+                if ((selected.Color == Color.White && !check[0]) || (selected.Color == Color.Black && !check[1]))
                 {
-                    //if piece matches the selected piece
-                    if (selected.x == piece.x && selected.y == piece.y && preventCheck(piece).name == "")
+                    int checkd = 0; //See MoveToString(check) for what this number means
+                                    //check for double move for en pessant
+                    if (selected.Name == "pawn" && selected.Y - e.RowIndex == 2)
                     {
-                        //if the piece is not in currently in check
-                        if ((piece.color == Color.White && !check[0]) || (piece.color == Color.Black && !check[1]))
+                        doubleMove = true;
+                    }
+                    board.Rows[selected.Y].Cells[selected.X].Value = null;    //remove the icon from the old position of the 
+
+                    //Set the position of the piece to the new coordinates
+                    selected.X = e.ColumnIndex;
+                    selected.Y = e.RowIndex;
+
+                    board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = selected.Icon;     //Place the pieces icon at the new coordinates
+                    selected.moved = true;
+
+                    ogColor();
+
+                    //if there are threats to the king, that side is in check
+                    if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
+                    {
+                        checkd = 1;
+                        check[turn ? 1 : 0] = true;
+                        checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
+
+                        //see if pieces can protect the king or the king can escape
+                        bool movable = false;
+
+                        //highlight all the pieces tiles from the enemy team
+                        foreach (Piece protect in Pieces.Where(k => turn ? k.Color == Color.Black : k.Color == Color.White))
                         {
-                            int checkd = 0;
-                            //check for double move for en pessant
-                            lastMove[0] = piece.name;
-                            if (piece.name == "pawn" && piece.y - e.RowIndex == 2)
-                            {
-                                lastMove[1] = "double move";
-                            }
-                            else
-                            {
-                                lastMove[1] = "move";
-                            }
-                            lastMove[2] = e.ColumnIndex.ToString();
-                            lastMove[3] = e.RowIndex.ToString();
-                            board.Rows[piece.y].Cells[piece.x].Value = null;
-                            piece.x = e.ColumnIndex;
-                            piece.y = e.RowIndex;
-                            board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = piece.icon;
-                            piece.moved = true;
-                            ogColor();
-                            //if there are threats to the king, that side is in check
-                            if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
-                            {
-                                checkd = 1;
-                                check[turn ? 1 : 0] = true;
-                                checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
-
-                                //see if pieces can protect the king or the king can escape
-                                bool movable = false;
-                                foreach (Piece protect in pieces)
-                                {
-                                    if (protect.color == (turn ? Color.Black : Color.White))
-                                    {
-                                        highlightSpaces(protect, true);
-                                    }
-                                }
-
-                                //iterate throught he board and see if there are blue spaces where the king can move
-                                foreach (DataGridViewRow row in board.Rows)
-                                {
-                                    foreach (DataGridViewImageCell cell in row.Cells)
-                                    {
-                                        if (cell.Style.BackColor == Color.Blue || cell.Style.BackColor == Color.Red)
-                                        {
-                                            movable = true;
-                                        }
-                                    }
-                                }
-
-                                //if the king cant move anywhere or other pieces cant come to protect the king
-                                if (!movable)
-                                {
-                                    checkd = 2;
-                                    endGame(turn ? Color.Black : Color.White);
-                                }
-                                else
-                                {
-                                    ogColor();
-                                }
-                            }
-
-                            if (turn)
-                            {
-                                whiteMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, false, checkd, 0, false));
-                            }
-                            else
-                            {
-                                blackMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, false, checkd, 0, false));
-                            }
-
-                            changeTurn();
-                            break;
+                            highlightSpaces(protect, true);
                         }
-                        //else if the piece is in check
-                        else if ((piece.color == Color.White && check[0]) || (piece.color == Color.Black && check[1]))
+
+                        //iterate throught he board and see if there are blue spaces where the king can move
+                        foreach (DataGridViewRow row in board.Rows)
                         {
-                            int checkd = 0;
-                            lastMove[0] = piece.name;
-                            if (piece.name == "pawn" && piece.y - e.RowIndex == 2)
+                            foreach (DataGridViewImageCell cell in row.Cells)
                             {
-                                lastMove[1] = "double move";
+                                if (cell.Style.BackColor == Color.Blue || cell.Style.BackColor == Color.Red)
+                                {
+                                    movable = true;
+                                }
                             }
-                            else
-                            {
-                                lastMove[1] = "move";
-                            }
-                            lastMove[2] = e.ColumnIndex.ToString();
-                            lastMove[3] = e.RowIndex.ToString();
-                            board.Rows[piece.y].Cells[piece.x].Value = null;
-                            piece.x = e.ColumnIndex;
-                            piece.y = e.RowIndex;
-                            board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = piece.icon;
-                            piece.moved = true;
+                        }
+
+                        //if the king cant move anywhere or other pieces cant come to protect the king
+                        if (!movable)
+                        {
+                            checkd = 2;
+                            endGame(turn ? Color.Black : Color.White);
+                        }
+                        else
+                        {
                             ogColor();
-                            //if there are threats to the other king, that side is in check
-                            if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
-                            {
-                                checkd = 1;
-                                check[turn ? 1 : 0] = true;
-                                checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
-
-                                //see if pieces can protect the king or the king can escape
-                                bool movable = false;
-                                foreach (Piece protect in pieces)
-                                {
-                                    if (protect.color == (turn ? Color.Black : Color.White))
-                                    {
-                                        highlightSpaces(protect, true);
-                                    }
-                                }
-
-                                //iterate throught he board and see if there are blue spaces where the king can move
-                                foreach (DataGridViewRow row in board.Rows)
-                                {
-                                    foreach (DataGridViewImageCell cell in row.Cells)
-                                    {
-                                        if (cell.Style.BackColor == Color.Blue)
-                                        {
-                                            movable = true;
-                                        }
-                                    }
-                                }
-
-                                //if the king cant move anywhere or other pieces cant come to protect the king
-                                if (!movable)
-                                {
-                                    checkd = 2;
-                                    endGame(turn ? Color.Black : Color.White);
-                                }
-                                else
-                                {
-                                    ogColor();
-                                }
-                            }
-                            //if the current side is in check and managed to cover there king, they are no longer in check
-                            else if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count == 0 && check[turn ? 0 : 1] == true)
-                            {
-                                check[turn ? 0 : 1] = false;
-                                checkLabel.Text = "In Check:";
-                            }
-
-                            if (turn)
-                            {
-                                whiteMoveBox.AppendText("\r\n" + move(piece.name, piece.x, piece.y, false, checkd, 0, false));
-                            }
-                            else
-                            {
-                                blackMoveBox.AppendText("\r\n" + move(piece.name, piece.x, piece.y, false, checkd, 0, false));
-                            }
-
-                            changeTurn();
-                            break;
                         }
                     }
+
+                    if (turn)
+                    {
+                        whiteMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, false, checkd, 0, false));
+                    }
+                    else
+                    {
+                        blackMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, false, checkd, 0, false));
+                    }
+
+                    changeTurn();
+                }
+                //else if the piece is in check
+                else if ((selected.Color == Color.White && check[0]) || (selected.Color == Color.Black && check[1]))
+                {
+                    int checkd = 0; //See MoveToString(check) for what this number means
+                                    //check for double move for en pessant
+                    if (selected.Name == "pawn" && selected.Y - e.RowIndex == 2)
+                    {
+                        lastMove.Item1 = selected.X;
+                        lastMove.Item2 = selected.Y;
+                    }
+                    board.Rows[selected.Y].Cells[selected.X].Value = null;    //remove the icon from the old position of the 
+
+                    //Set the position of the piece to the new coordinates
+                    selected.X = e.ColumnIndex;
+                    selected.Y = e.RowIndex;
+
+                    board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = selected.Icon;     //Place the pieces icon at the new coordinates
+                    selected.moved = true;
+
+                    ogColor();
+
+                    //if there are threats to the other king, that side is in check
+                    if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
+                    {
+                        checkd = 1;
+                        check[turn ? 1 : 0] = true;
+                        checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
+
+                        //see if pieces can protect the king or the king can escape
+                        bool movable = false;
+                        foreach (Piece protect in Pieces.Where(x => x.Color == (turn ? Color.Black : Color.White)))
+                        {
+                            highlightSpaces(protect, true);
+                        }
+
+                        //iterate throught he board and see if there are blue spaces where the king can move
+                        foreach (DataGridViewRow row in board.Rows)
+                        {
+                            foreach (DataGridViewImageCell cell in row.Cells.Cast<DataGridViewImageCell>().Where(x => x.Style.BackColor == Color.Blue))
+                            {
+                                movable = true;
+                                goto MovableFound;
+                            }
+                        }
+                    MovableFound:
+
+                        //if the king cant move anywhere or other pieces cant come to protect the king
+                        if (!movable)
+                        {
+                            checkd = 2;
+                            endGame(turn ? Color.Black : Color.White);
+                        }
+                        else
+                        {
+                            ogColor();
+                        }
+                    }
+
+                    //Diff from first if statement
+                    //if the current side is in check and managed to cover there king, they are no longer in check
+                    else if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count == 0 && check[turn ? 0 : 1] == true)
+                    {
+                        check[turn ? 0 : 1] = false;
+                        checkLabel.Text = "In Check:";
+                    }
+
+                    if (turn)
+                    {
+                        whiteMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, false, checkd, 0, false));
+                    }
+                    else
+                    {
+                        blackMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, false, checkd, 0, false));
+                    }
+
+                    changeTurn();
                 }
             }
             //kill a piece
             else if (board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Red)
             {
-                Piece remove = new Piece();
-                //finds the peice beign removed
-                if (enPassant)
+                //Check to see moving this piece to kill will result in a check. Only follow through if the move won't lead to a check
+                if (!checkForACheck(selected, e.ColumnIndex, e.RowIndex, true))
                 {
-                    foreach (Piece piece in pieces)
+                    //set last move values
+                    lastMove.Item1 = selected.X;
+                    lastMove.Item2 = selected.Y;
+                    //remove the picture of the killed piece
+                    board.Rows[selected.Y].Cells[selected.X].Value = null;
+                    //remove killed piece
+                    Pieces.Remove(selected);
+
+                    //update the new position of the piece that did the kill
+                    selected.X = e.ColumnIndex;
+                    selected.Y = e.RowIndex;
+
+
+                    //move the picture of the piece that killed
+                    board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = selected.Icon;
+
+                    //update the value of the piece that just killed saying it has been selected
+                    selected.moved = true;
+
+                    //if the piece is not in currently in check
+                    if ((selected.Color == Color.White && !check[0]) || (selected.Color == Color.Black && !check[1]))
                     {
-                        if (e.ColumnIndex == piece.x && e.RowIndex == piece.y - 1)
+                        ogColor();
+                        if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
                         {
-                            remove = piece;
-                            break;
-                        }
-                    }
-                    enPassant = false;
-                }
-                else
-                {
-                    foreach (Piece piece in pieces)
-                    {
-                        if (e.ColumnIndex == piece.x && e.RowIndex == piece.y)
-                        {
-                            remove = piece;
-                            break;
-                        }
-                    }
-                }
-
-                foreach (Piece piece in pieces)
-                {
-                    if (selected.x == piece.x && selected.y == piece.y && (preventCheck(piece).name == "" || (preventCheck(piece).name != "" && !checkForACheck(piece,remove.x,remove.y,true))))
-                    {
-                        lastMove[0] = piece.name;
-                        lastMove[1] = "kill";
-                        lastMove[2] = e.ColumnIndex.ToString();
-                        lastMove[3] = e.RowIndex.ToString();
-                        board.Rows[remove.y].Cells[remove.x].Value = null;
-                        pieces.Remove(remove);
-
-                        board.Rows[piece.y].Cells[piece.x].Value = null;
-
-                        piece.x = e.ColumnIndex;
-                        piece.y = e.RowIndex;
-                        board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = piece.icon;
-
-                        piece.moved = true;
-
-                        enPassant = false;
-                        //if the piece is not in currently in check
-                        if ((piece.color == Color.White && !check[0]) || (piece.color == Color.Black && !check[1]))
-                        {
-                            ogColor();
-                            if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
-                            {
-                                if (turn)
-                                {
-                                    whiteMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 1, 0, false));
-                                }
-                                else
-                                {
-                                    blackMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 1, 0, false));
-                                }
-                                check[turn ? 1 : 0] = true;
-                                checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
-                            }
                             if (turn)
                             {
-                                whiteMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 0, 0, false));
+                                whiteMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 1, 0, false));
                             }
                             else
                             {
-                                blackMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 0, 0, false));
+                                blackMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 1, 0, false));
                             }
-                            changeTurn();
-                            break;
+                            check[turn ? 1 : 0] = true;
+                            checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
                         }
-                        else if ((piece.color == Color.White && check[0]) || (piece.color == Color.Black && check[1]))
+                        if (turn)
                         {
-                            ogColor();
-                            if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count == 0)
+                            whiteMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 0, 0, false));
+                        }
+                        else
+                        {
+                            blackMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 0, 0, false));
+                        }
+                        changeTurn();
+                    } //else if the piece is in check
+                    else if ((selected.Color == Color.White && check[0]) || (selected.Color == Color.Black && check[1]))
+                    {
+                        ogColor();
+                        if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count == 0)
+                        {
+                            if (turn)
                             {
-                                if (turn)
-                                {
-                                    whiteMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 0, 0, false));
-                                }
-                                else
-                                {
-                                    blackMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 0, 0, false));
-                                }
-                                check[piece.color == Color.White ? 0 : 1] = false;
-                                checkLabel.Text = "In Check: ";
-                                changeTurn();
-                                break;
+                                whiteMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 0, 0, false));
                             }
                             else
                             {
-                                if (turn)
-                                {
-                                    whiteMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 2, 0, false));
-                                }
-                                else
-                                {
-                                    blackMoveBox.AppendText("\r\n"+move(piece.name, piece.x, piece.y, true, 2, 0, false));
-                                }
-                                endGame(turn ? Color.Black : Color.White);
+                                blackMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 0, 0, false));
                             }
-                            return;
+                            check[selected.Color == Color.White ? 0 : 1] = false;
+                            checkLabel.Text = "In Check: ";
+                            changeTurn();
+                        }
+                        else
+                        {
+                            if (turn)
+                            {
+                                whiteMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 2, 0, false));
+                            }
+                            else
+                            {
+                                blackMoveBox.AppendText("\r\n" + MoveToString(selected.Name, selected.X, selected.Y, true, 2, 0, false));
+                            }
+                            endGame(turn ? Color.Black : Color.White);
                         }
                     }
                 }
@@ -496,79 +458,66 @@ namespace Chess
             else if (board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Green)
             {
                 //find the rook
-                Piece rook = new Piece();
-                foreach (Piece piece in pieces)
-                {
-                    if (piece.x == e.ColumnIndex && piece.y == e.RowIndex)
-                    {
-                        rook = piece;
-                    }
-                }
+                Piece rook = Pieces.Find(k => k.X == e.ColumnIndex && k.Y == e.RowIndex);
 
                 //find the king
-                Piece king = new Piece();
-                foreach (Piece piece in pieces)
-                {
-                    if (rook.color == piece.color && piece.name == "king")
-                    {
-                        king = piece;
-                    }
-                }
+                Piece king = Pieces.Find(k => k.Color == rook.Color && k.Name == "king");
 
-                if (king.color == Color.White)
+                if (king.Color == Color.White)
                 {
                     //Check to see what king of castle is beign done
                     bool kingSide = false;
-                    if (king.x + 3 == rook.x)
+                    if (king.X + 3 == rook.X)
                     {
                         kingSide = true;
                     }
 
+                    //white kingside castle
                     if (kingSide)
                     {
-                        if (rook.color == Color.White)
+                        if (rook.Color == Color.White)
                         {
-                            board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x + 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x - 2].Value = rook.icon;
-                            king.x += 2;
-                            rook.x -= 2;
-                            whiteMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 1, false));
+                            board.Rows[king.Y].Cells[king.X].Value = null;
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X + 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X - 2].Value = rook.Icon;
+                            king.X += 2;
+                            rook.X -= 2;
+                            whiteMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 1, false));
                         }
                         else
                         {
-                            board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x - 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x + 2].Value = rook.icon;
-                            king.x -= 2;
-                            rook.x += 2;
-                            blackMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 1, false));
+                            board.Rows[king.Y].Cells[king.X].Value = null;
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X - 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X + 2].Value = rook.Icon;
+                            king.X -= 2;
+                            rook.X += 2;
+                            blackMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 1, false));
                         }
-                    }
+                    } //white queenside castle
                     else
                     {
-                        if (rook.color == Color.White)
+                        if (rook.Color == Color.White)
                         {
-                            board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x - 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x + 3].Value = rook.icon;
-                            king.x -= 2;
-                            rook.x += 3;
-                            whiteMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 2, false));
+                            board.Rows[king.Y].Cells[king.X].Value = null;
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X - 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X + 3].Value = rook.Icon;
+                            king.X -= 2;
+                            rook.X += 3;
+                            whiteMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 2, false));
 
                         }
                         else
                         {
-                            board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x + 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x - 3].Value = rook.icon;
-                            king.x += 2;
-                            rook.x -= 3;
-                            blackMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 2, false));
+                            board.Rows[king.Y].Cells[king.X].Value = null;
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X + 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X - 3].Value = rook.Icon;
+                            king.X += 2;
+                            rook.X -= 3;
+                            blackMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 2, false));
                         }
                     }
                 }
@@ -576,69 +525,55 @@ namespace Chess
                 {
                     //Check to see what king of castle is beign done
                     bool kingSide = false;
-                    if (king.x - 3 == rook.x)
+                    if (king.X - 3 == rook.X)
                     {
                         kingSide = true;
                     }
 
+                    //black kingside castle
                     if (kingSide)
                     {
-                        if (rook.color == Color.White)
+                        if (rook.Color == Color.White)
                         {
-                            lastMove[0] = king.name;
-                            lastMove[1] = "castle";
-                            lastMove[2] = king.x.ToString();
-                            lastMove[3] = king.y.ToString(); 
-                            board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x + 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x - 2].Value = rook.icon;
-                            king.x += 2;
-                            rook.x -= 2;
-                            whiteMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 1, false));
+                            board.Rows[king.Y].Cells[king.X].Value = null;
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X + 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X - 2].Value = rook.Icon;
+                            king.X += 2;
+                            rook.X -= 2;
+                            whiteMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 1, false));
                         }
                         else
                         {
-                            lastMove[0] = king.name;
-                            lastMove[1] = "castle";
-                            lastMove[2] = king.x.ToString();
-                            lastMove[3] = king.y.ToString(); board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x - 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x + 2].Value = rook.icon;
-                            king.x -= 2;
-                            rook.x += 2;
-                            blackMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 1, false));
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X - 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X + 2].Value = rook.Icon;
+                            king.X -= 2;
+                            rook.X += 2;
+                            blackMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 1, false));
                         }
                     }
+                    //black queenside castle
                     else
                     {
-                        if (rook.color == Color.White)
+                        if (rook.Color == Color.White)
                         {
-                            lastMove[0] = king.name;
-                            lastMove[1] = "castle";
-                            lastMove[2] = king.x.ToString();
-                            lastMove[3] = king.y.ToString(); board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x + 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x - 3].Value = rook.icon;
-                            king.x += 2;
-                            rook.x -= 3;
-                            whiteMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 2, false));
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X + 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X - 3].Value = rook.Icon;
+                            king.X += 2;
+                            rook.X -= 3;
+                            whiteMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 2, false));
 
                         }
                         else
                         {
-                            lastMove[0] = king.name;
-                            lastMove[1] = "castle";
-                            lastMove[2] = king.x.ToString();
-                            lastMove[3] = king.y.ToString(); board.Rows[king.y].Cells[king.x].Value = null;
-                            board.Rows[rook.y].Cells[rook.x].Value = null;
-                            board.Rows[king.y].Cells[king.x - 2].Value = king.icon;
-                            board.Rows[rook.y].Cells[rook.x + 3].Value = rook.icon;
-                            king.x -= 2;
-                            rook.x += 3;
-                            blackMoveBox.AppendText("\r\n" + move("", -1, -1, false, 0, 2, false));
+                            board.Rows[rook.Y].Cells[rook.X].Value = null;
+                            board.Rows[king.Y].Cells[king.X - 2].Value = king.Icon;
+                            board.Rows[rook.Y].Cells[rook.X + 3].Value = rook.Icon;
+                            king.X -= 2;
+                            rook.X += 3;
+                            blackMoveBox.AppendText("\r\n" + MoveToString("", -1, -1, false, 0, 2, false));
                         }
                     }
                 }
@@ -649,101 +584,83 @@ namespace Chess
             //Promotion //TODO Add support for other piece options
             else if(board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Purple)
             {
-                foreach (Piece piece in pieces)
+                //TODO use .Find to get selected piece rather than for loop
+                Piece piece = Pieces.Find(k => k.X == selected.X && k.Y == selected.Y);
+                if (preventCheck(piece).Name == "")
                 {
-                    if (piece.x == selected.x && piece.y == selected.y && preventCheck(piece).name == "")
+                    if (turn && piece.Color == Color.White)
                     {
-                        if (turn && piece.color == Color.White)
-                        {
-                            piece.icon = Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wqueen.png");
-                            piece.name = "queen";
-                        }
-                        else
-                        {
-                            piece.icon = Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bqueen.png");
-                            piece.name = "queen";
-                        }
-
-                        Piece remove = new Piece();
-                        //check to see if there is a piece in the way that will be killed
-                        foreach (Piece kill in pieces)
-                        {
-                            if (kill.color != piece.color && kill.x == e.ColumnIndex && kill.y == e.RowIndex)
-                            {
-                                remove = kill;
-                                break;
-                            }
-                        }
-                        if (remove.x != -1)
-                        {
-                            pieces.Remove(remove);
-                        }
-
-                        int checkd = 0;
-                        lastMove[0] = piece.name;
-                        lastMove[1] = "promotion";
-                        lastMove[2] = e.ColumnIndex.ToString();
-                        lastMove[3] = e.RowIndex.ToString(); 
-                        board.Rows[piece.y].Cells[piece.x].Value = null;
-                        piece.x = e.ColumnIndex;
-                        piece.y = e.RowIndex;
-                        board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = piece.icon;
-                        piece.moved = true;
-                        ogColor();
-
-                        //if there are threats to the king, that side is in check
-                        if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
-                        {
-                            checkd = 1;
-                            check[turn ? 1 : 0] = true;
-                            checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
-
-                            //see if pieces can protect the king or the king can escape
-                            bool movable = false;
-                            foreach (Piece protect in pieces)
-                            {
-                                if (protect.color == (turn ? Color.Black : Color.White))
-                                {
-                                    highlightSpaces(protect, true);
-                                }
-                            }
-
-                            //iterate throught he board and see if there are blue spaces where the king can move
-                            foreach (DataGridViewRow row in board.Rows)
-                            {
-                                foreach (DataGridViewImageCell cell in row.Cells)
-                                {
-                                    if (cell.Style.BackColor == Color.Blue)
-                                    {
-                                        movable = true;
-                                    }
-                                }
-                            }
-
-                            //if the king cant move anywhere or other pieces cant come to protect the king
-                            if (!movable)
-                            {
-                                checkd = 2;
-                                endGame(turn ? Color.Black : Color.White);
-                            }
-                            else
-                            {
-                                ogColor();
-                            }
-                        }
-
-                        if (turn)
-                        {
-                            whiteMoveBox.AppendText("\r\n" + move(piece.name, piece.x, piece.y, false, checkd, 0, true));
-                        }
-                        else
-                        {
-                            blackMoveBox.AppendText("\r\n" + move(piece.name, piece.x, piece.y, false, checkd, 0, true));
-                        }
-
-                        changeTurn();
-                        break;
+                        piece.Icon = Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Wqueen.png");
+                        piece.Name = "queen";
                     }
+                    else
+                    {
+                        piece.Icon = Image.FromFile(AppDomain.CurrentDomain.BaseDirectory + "Resources\\Bqueen.png");
+                        piece.Name = "queen";
+                    }
+
+                    //If a piece is in the way and will be killed, just remove it from the pieces list. It will be removed from the board when the killer pic is written over the killed pic
+                    try
+                    {
+                        Pieces.Remove(Pieces.Find(k => k.Color != piece.Color && k.X == e.ColumnIndex && k.Y == e.RowIndex));
+                    }
+                    catch (ArgumentNullException){}
+                    
+                    int checkd = 0;
+                    board.Rows[piece.Y].Cells[piece.X].Value = null;
+                    piece.X = e.ColumnIndex;
+                    piece.Y = e.RowIndex;
+                    board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = piece.Icon;
+                    piece.moved = true;
+                    ogColor();
+
+                    //if there are threats to the king, that side is in check
+                    if (getCheckTiles(turn ? Color.White : Color.Black)[0].Count != 0)
+                    {
+                        checkd = 1;
+                        check[turn ? 1 : 0] = true;
+                        checkLabel.Text = "In Check: " + (turn ? "Black" : "White");
+
+                        //see if pieces can protect the king or the king can escape
+                        bool movable = false;
+
+                        //highlight all the spaces of the enemy team
+                        highlightSpaces(Pieces.Find(k => k.Color == (turn ? Color.Black : Color.White)), true);
+
+                        //iterate throught he board and see if there are blue spaces where the king can move
+                        foreach (DataGridViewRow row in board.Rows)
+                        {
+                            foreach (DataGridViewImageCell cell in row.Cells)
+                            {
+                                if (cell.Style.BackColor == Color.Blue)
+                                {
+                                    movable = true;
+                                }
+                            }
+                        }
+
+                        //if the king cant move anywhere or other pieces cant come to protect the king
+                        if (!movable)
+                        {
+                            checkd = 2;
+                            endGame(turn ? Color.Black : Color.White);
+                        }
+                        else
+                        {
+                            ogColor();
+                        }
+                    }
+
+                    if (turn)
+                    {
+                        whiteMoveBox.AppendText("\r\n" + MoveToString(piece.Name, piece.X, piece.Y, false, checkd, 0, true));
+                    }
+                    else
+                    {
+                        blackMoveBox.AppendText("\r\n" + MoveToString(piece.Name, piece.X, piece.Y, false, checkd, 0, true));
+                    }
+
+                    changeTurn();
                 }
             }
             //Just an empty if to handle accidentally clicking on an empty cell
@@ -754,25 +671,25 @@ namespace Chess
             //show possible moves
             else
             {
+                //if player clicks on a piece that isn't theirs, end early
+                if (Pieces.Any(k => k.X == e.ColumnIndex && k.Y == e.RowIndex && k.Color != (turn ? Color.White : Color.Black)))
+                {
+                    return;
+                }
                 ogColor();
                 selected = null;
-                foreach (Piece piece in pieces)
+
+                //Get the selected piece and highlight it's spots
+                Piece piece = Pieces.Find(k => k.Color == (turn ? Color.White : Color.Black) && k.X == e.ColumnIndex && k.Y == e.RowIndex);
+                if (preventCheck(piece).Name == "")
                 {
-                    if (piece.color == (turn ? Color.White : Color.Black))
-                    {
-                        if (piece.x == e.ColumnIndex && piece.y == e.RowIndex && preventCheck(piece).name == "")
-                        {
-                            highlightSpaces(piece, check[(piece.color == Color.White) ? 0 : 1]);
-                            selected = piece;
-                            break;
-                        }
-                        else if (piece.x == e.ColumnIndex && piece.y == e.RowIndex && preventCheck(piece).name != "")
-                        {
-                            highlightSpaces(piece, false);
-                            selected = piece;
-                            break;
-                        }
-                    }
+                    highlightSpaces(piece, check[(piece.Color == Color.White) ? 0 : 1]);
+                    selected = piece;
+                }
+                else if (preventCheck(piece).Name != "")
+                {
+                    highlightSpaces(piece, false);
+                    selected = piece;
                 }
             }
         }
@@ -787,6 +704,7 @@ namespace Chess
         public String getTile(int x, int y)
         {
             String row = "";
+            
             foreach (DataGridViewRow findRow in board.Rows)
             {
                 if (y == findRow.Index)
@@ -816,9 +734,10 @@ namespace Chess
         /// <returns></returns>
         public bool checkStale(Color color)
         {
-            foreach (Piece piece in pieces)
+            //highlight all the spaces of the color
+            foreach (Piece piece in Pieces)
             {
-                if (piece.color == color)
+                if (piece.Color == color)
                 {
                     highlightSpaces(piece, false);
                 }
@@ -850,7 +769,7 @@ namespace Chess
         /// <param name="castle">if a castle occured. 0 = no castle, 1 = kingside, 2 = queenside</param>
         /// /// <param name="promotion">if a pawn is promoted</param>
         /// <returns></returns>
-        public String move(String piece, int x, int y, bool kill, int check, int castle, bool promotion)
+        public String MoveToString(String piece, int x, int y, bool kill, int check, int castle, bool promotion)
         {
             String tile = getTile(x,y);
 
@@ -943,15 +862,7 @@ namespace Chess
         /// <returns></returns>
         public List<int[]>[] getCheckTiles(Color attack)
         {
-            Piece king = new Piece();
-            foreach (Piece piece in pieces)
-            {
-                if (piece.name == "king" && piece.color != attack)
-                {
-                    king = piece;
-                    break;
-                }
-            }
+            Piece king = Pieces.Find(k => k.Name == "king" && k.Color != attack);
 
             // int[0] == x cord
             // int[1] == y cord
@@ -962,23 +873,23 @@ namespace Chess
             //tiles that the enemy can move and kill if you go there next turn (FOR THE KING)
             List<int[]> future = new List<int[]>();
 
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in Pieces)
             {
                 //checks if piece is attacking
-                if (piece.color == attack)
+                if (piece.Color == attack)
                 {
-                    int x = piece.x;
-                    int y = piece.y;
+                    int x = piece.X;
+                    int y = piece.Y;
 
                     //if the pawn can kill the king, the cord of the pawn in recorded as necessary to kill
                     //if the pawn kill tile is empty, it is marked as a future threat
-                    if (piece.name == "pawn" && piece.color == Color.White && attack == Color.White)
+                    if (piece.Name == "pawn" && piece.Color == Color.White && attack == Color.White)
                     {
                         if (turn)
                         {
                             if (x - 1 > -1 && y - 1 > -1)
                             {
-                                if (king.x == x - 1 && king.y == y - 1)
+                                if (king.X == x - 1 && king.Y == y - 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y - 1, 0 });
@@ -990,7 +901,7 @@ namespace Chess
                             }
                             if (x + 1 < 8 && y - 1 > -1)
                             {
-                                if (king.x == x + 1 && king.y == y - 1)
+                                if (king.X == x + 1 && king.Y == y - 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y - 1, 0 });
@@ -1005,7 +916,7 @@ namespace Chess
                         {
                             if (x - 1 > -1 && y + 1 < 8)
                             {
-                                if (king.x == x - 1 && king.y == y + 1)
+                                if (king.X == x - 1 && king.Y == y + 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y + 1, 0 });
@@ -1017,7 +928,7 @@ namespace Chess
                             }
                             if (x + 1 < 8 && y + 1 < 8)
                             {
-                                if (king.x == x + 1 && king.y == y + 1)
+                                if (king.X == x + 1 && king.Y == y + 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y + 1, 0 });
@@ -1030,13 +941,13 @@ namespace Chess
                         }
                         
                     }
-                    else if (piece.name == "pawn" && piece.color == Color.Black && attack == Color.Black)
+                    else if (piece.Name == "pawn" && piece.Color == Color.Black && attack == Color.Black)
                     {
                         if (turn)
                         {
                             if (x - 1 > -1 && y + 1 < 8)
                             {
-                                if (king.x == x - 1 && king.y == y + 1)
+                                if (king.X == x - 1 && king.Y == y + 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y + 1, 0 });
@@ -1048,7 +959,7 @@ namespace Chess
                             }
                             if (x + 1 < 8 && y + 1 < 8)
                             {
-                                if (king.x == x + 1 && king.y == y + 1)
+                                if (king.X == x + 1 && king.Y == y + 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y + 1, 0 });
@@ -1063,7 +974,7 @@ namespace Chess
                         {
                             if (x - 1 > -1 && y - 1 > -1)
                             {
-                                if (king.x == x - 1 && king.y == y - 1)
+                                if (king.X == x - 1 && king.Y == y - 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y - 1, 0 });
@@ -1075,7 +986,7 @@ namespace Chess
                             }
                             if (x + 1 < 8 && y - 1 > -1)
                             {
-                                if (king.x == x + 1 && king.y == y - 1)
+                                if (king.X == x + 1 && king.Y == y - 1)
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y - 1, 0 });
@@ -1088,7 +999,7 @@ namespace Chess
                         }
                     }
                     //if the blue spots lead to a kill on the king, the possible tiles in List(possible) are added to tiles
-                    else if (piece.name == "rook")
+                    else if (piece.Name == "rook")
                     {
                         //lits of possible spaces the rook can go to kill the king
                         List<int[]> possible = new List<int[]>();
@@ -1104,18 +1015,18 @@ namespace Chess
                                 possible.Add(new int[] { x, i, 0 });
                                 future.Add(new int[] { x, i, 0 });
                             }
-                            else if (king.x == x && king.y == i)
+                            else if (king.X == x && king.Y == i)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
@@ -1137,18 +1048,18 @@ namespace Chess
                                 possible.Add(new int[] { x, i, 0 });
                                 future.Add(new int[] { x, i, 0 });
                             }
-                            else if (king.x == x && king.y == i)
+                            else if (king.X == x && king.Y == i)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
@@ -1169,18 +1080,18 @@ namespace Chess
                                 possible.Add(new int[] { i, y, 0 });
                                 future.Add(new int[] { i, y, 0 });
                             }
-                            else if (king.x == i && king.y == y)
+                            else if (king.X == i && king.Y == y)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1201,18 +1112,18 @@ namespace Chess
                                 possible.Add(new int[] { i, y, 0 });
                                 future.Add(new int[] { i, y, 0 });
                             }
-                            else if (king.x == i && king.y == y)
+                            else if (king.X == i && king.Y == y)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1221,12 +1132,12 @@ namespace Chess
                         possible.Clear();
                     }
                     //if the horse can kill the king, the cords of the horse are recorded as necessary to kill
-                    else if (piece.name == "horse")
+                    else if (piece.Name == "horse")
                     {
                         //up left
                         if (y - 2 > -1 && x - 1 > -1)
                         {
-                            if (king.x == x - 1 && king.y == y - 2)
+                            if (king.X == x - 1 && king.Y == y - 2)
                             {
                                 threats.Add(new int[] {x, y, 1});
                             }
@@ -1239,7 +1150,7 @@ namespace Chess
                         //up right
                         if (y - 2 > -1 && x + 1 < 8 )
                         {
-                            if (king.x == x + 1 && king.y == y - 2)
+                            if (king.X == x + 1 && king.Y == y - 2)
                             {
                                 threats.Add(new int[] { x, y, 1 });
                             }
@@ -1252,7 +1163,7 @@ namespace Chess
                         //right up
                         if (y - 1 > -1 && x + 2 < 8)
                         {
-                            if (king.x == x + 2 && king.y == y - 1)
+                            if (king.X == x + 2 && king.Y == y - 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
                             }
@@ -1265,7 +1176,7 @@ namespace Chess
                         //right down
                         if (y + 1 < 8 && x + 2 < 8)
                         {
-                            if (king.x == x + 2 && king.y == y + 1)
+                            if (king.X == x + 2 && king.Y == y + 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
                             }
@@ -1278,7 +1189,7 @@ namespace Chess
                         //down left
                         if (y + 2 < 8 && x - 1 > -1)
                         {
-                            if (king.x == x - 1 && king.y == y + 2)
+                            if (king.X == x - 1 && king.Y == y + 2)
                             {
                                 threats.Add(new int[] { x, y, 1 });
                             }
@@ -1291,7 +1202,7 @@ namespace Chess
                         //down right
                         if (y + 2 < 8 && x + 1 < 8)
                         {
-                            if (king.x == x + 1 && king.y == y + 2)
+                            if (king.X == x + 1 && king.Y == y + 2)
                             {
                                 threats.Add(new int[] { x, y, 1 });
                             }
@@ -1304,7 +1215,7 @@ namespace Chess
                         //left up
                         if (y + 1 < 8 && x - 2 > -1)
                         {
-                            if (king.x == x - 2 && king.y == y + 1)
+                            if (king.X == x - 2 && king.Y == y + 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
                             }
@@ -1317,7 +1228,7 @@ namespace Chess
                         //left down
                         if (y - 1 > -1 && x - 2 > -1)
                         {
-                            if (king.x == x - 2 && king.y == y - 1)
+                            if (king.X == x - 2 && king.Y == y - 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
                             }
@@ -1327,7 +1238,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (piece.name == "bishop")
+                    else if (piece.Name == "bishop")
                     {
                         //x
                         int i;
@@ -1354,18 +1265,18 @@ namespace Chess
                                 possible.Add(new int[] {i, j, 0});
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] {i, j, 0});
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1391,18 +1302,18 @@ namespace Chess
                                 possible.Add(new int[] { i, j, 0 });
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1428,18 +1339,18 @@ namespace Chess
                                 possible.Add(new int[] { i, j, 0 });
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1465,18 +1376,18 @@ namespace Chess
                                 possible.Add(new int[] { i, j, 0 });
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1484,7 +1395,7 @@ namespace Chess
                         }
                         possible.Clear();
                     }
-                    else if (piece.name == "queen")
+                    else if (piece.Name == "queen")
                     {
                         //x
                         int i;
@@ -1494,8 +1405,6 @@ namespace Chess
 
                         //lits of possible spaces the rook can go to kill the king
                         List<int[]> possible = new List<int[]>();
-
-                        bool found = false;
 
                         //adding bishop cords
                         possible.Add(new int[] { x, y, 1 });
@@ -1513,18 +1422,18 @@ namespace Chess
                                 possible.Add(new int[] { i, j, 0 });
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1550,18 +1459,18 @@ namespace Chess
                                 possible.Add(new int[] { i, j, 0 });
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1587,18 +1496,18 @@ namespace Chess
                                 possible.Add(new int[] { i, j, 0 });
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1624,18 +1533,18 @@ namespace Chess
                                 possible.Add(new int[] { i, j, 0 });
                                 future.Add(new int[] { i, j, 0 });
                             }
-                            else if (king.x == i && king.y == j)
+                            else if (king.X == i && king.Y == j)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1654,18 +1563,18 @@ namespace Chess
                                 possible.Add(new int[] { x, i, 0 });
                                 future.Add(new int[] { x, i, 0 });
                             }
-                            else if (king.x == x && king.y == i)
+                            else if (king.X == x && king.Y == i)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
@@ -1687,18 +1596,18 @@ namespace Chess
                                 possible.Add(new int[] { x, i, 0 });
                                 future.Add(new int[] { x, i, 0 });
                             }
-                            else if (king.x == x && king.y == i)
+                            else if (king.X == x && king.Y == i)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
@@ -1719,18 +1628,18 @@ namespace Chess
                                 possible.Add(new int[] { i, y, 0 });
                                 future.Add(new int[] { i, y, 0 });
                             }
-                            else if (king.x == i && king.y == y)
+                            else if (king.X == i && king.Y == y)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1751,18 +1660,18 @@ namespace Chess
                                 possible.Add(new int[] { i, y, 0 });
                                 future.Add(new int[] { i, y, 0 });
                             }
-                            else if (king.x == i && king.y == y)
+                            else if (king.X == i && king.Y == y)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[y].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[i].Cells[y].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1770,7 +1679,7 @@ namespace Chess
                         }
                         possible.Clear();
                     }
-                    else if (piece.name == "king")
+                    else if (piece.Name == "king")
                     {
                         //right
                         if (x + 1 < 8)
@@ -1889,6 +1798,7 @@ namespace Chess
             }
         }
 
+        // TODO keep track of changed colors and reset them back rather than changing everything
         /// <summary>
         /// recolors a specific tile back to its original color
         /// </summary>
@@ -1933,37 +1843,37 @@ namespace Chess
         {
             if(!check)
             {
-                int x = piece.x;
-                int y = piece.y;
-                if (piece.name == "pawn" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
+                int x = piece.X;
+                int y = piece.Y;
+                if (piece.Name == "pawn" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))
                 {
                     //left kill
-                    if (x - 1 != -1 && y - 1 != -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1) && !checkForACheck(piece, x - 1, y - 1,true))
+                    if (x - 1 != -1 && y - 1 != -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1) && !checkForACheck(piece, x - 1, y - 1,true))
                     {
                         board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
                     }
 
                     //right kill
-                    if (x + 1 != 8 && y - 1 != -1 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y - 1) && !checkForACheck(piece,x+1,y-1,true))
+                    if (x + 1 != 8 && y - 1 != -1 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1) && !checkForACheck(piece,x+1,y-1,true))
                     {
                         board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
                     }
 
-                    //left en Passant
-                    if (x - 1 > -1 && y - 1 > -1 && board.Rows[y].Cells[x - 1].Value != null && board.Rows[y - 1].Cells[x - 1].Value == null && containsEnemy(piece.color, x - 1, y) && !checkForACheck(piece, x - 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x - 1 && int.Parse(lastMove[3]) == y)
+                    if (Pieces.Find(k => k.X == x && k.Y == y).Name == "pawn")
                     {
-                        board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
-                        //board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.FromArgb(255,1,1);
-                        enPassant = true;
-                    }
+                        //left en Passant
+                        if (x - 1 > -1 && y - 1 > -1 && board.Rows[y].Cells[x - 1].Value != null && board.Rows[y - 1].Cells[x - 1].Value == null && containsEnemy(piece.Color, x - 1, y) && !checkForACheck(piece, x - 1, y - 1, true) && doubleMove == true && lastMove.Item1 == x - 1 && lastMove.Item2 == y)
+                        {
+                            board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
+                        }
 
-                    //right en Passant
-                    if (x + 1 < 8 && y - 1 > -1 && board.Rows[y].Cells[x + 1].Value != null && board.Rows[y - 1].Cells[x + 1].Value == null && containsEnemy(piece.color, x + 1, y) && !checkForACheck(piece, x + 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x + 1 && int.Parse(lastMove[3]) == y)
-                    {
-                        board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
-                        //board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.FromArgb(255, 1, 1);
-                        enPassant = true;
+                        //right en Passant
+                        if (x + 1 < 8 && y - 1 > -1 && board.Rows[y].Cells[x + 1].Value != null && board.Rows[y - 1].Cells[x + 1].Value == null && containsEnemy(piece.Color, x + 1, y) && !checkForACheck(piece, x + 1, y - 1, true) && doubleMove == true && lastMove.Item1 == x + 1 && lastMove.Item2 == y)
+                        {
+                            board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
+                        }
                     }
+                    
 
                     //move 
                     if (y - 1 != -1 && board.Rows[y - 1].Cells[x].Value == null && !checkForACheck(piece, x, y - 1,false))
@@ -1984,24 +1894,24 @@ namespace Chess
                     }
 
                     //promotion & kill right
-                    if (y - 1 == 0 && x + 1 < 8 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.color,x + 1,y - 1) && !checkForACheck(piece, x + 1, y - 1, false))
+                    if (y - 1 == 0 && x + 1 < 8 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color,x + 1,y - 1) && !checkForACheck(piece, x + 1, y - 1, false))
                     {
                         board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Purple;
                     }
 
                     //promotion & kill right
-                    if (y - 1 == 0 && x - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1) && !checkForACheck(piece, x - 1, y - 1, false))
+                    if (y - 1 == 0 && x - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1) && !checkForACheck(piece, x - 1, y - 1, false))
                     {
                         board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Purple;
                     }
                 }
-                else if (piece.name == "pawn" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                else if (piece.Name == "pawn" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
                 {
-                    if (x + 1 < 8 && y + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 1) && !checkForACheck(piece, x + 1, y + 1, true))
+                    if (x + 1 < 8 && y + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1) && !checkForACheck(piece, x + 1, y + 1, true))
                     {
                         board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Red;
                     }
-                    if (x - 1 > -1 && y + 1 < 8 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 1) && !checkForACheck(piece, x - 1, y + 1, true))
+                    if (x - 1 > -1 && y + 1 < 8 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1) && !checkForACheck(piece, x - 1, y + 1, true))
                     {
                         board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Red;
                     }
@@ -2017,16 +1927,16 @@ namespace Chess
                     {
                         board.Rows[y + 1].Cells[x].Style.BackColor = Color.Purple;
                     }
-                    if (y + 1 < 8 && x - 1 > -1 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 1) && !checkForACheck(piece, x - 1, y + 1, false))
+                    if (y + 1 < 8 && x - 1 > -1 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1) && !checkForACheck(piece, x - 1, y + 1, false))
                     {
                         board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Purple;
                     }
-                    if (y + 1 < 8 && x + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 1) && !checkForACheck(piece, x + 1, y + 1, false))
+                    if (y + 1 < 8 && x + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1) && !checkForACheck(piece, x + 1, y + 1, false))
                     {
                         board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Purple;
                     }
                 }
-                else if (piece.name == "rook" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
+                else if (piece.Name == "rook" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))
                 {
                     //above (i represents y/row)
                     for (int i = y - 1; i > -1; i--)
@@ -2035,12 +1945,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && !checkForACheck(piece, x, i,true))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !checkForACheck(piece, x, i,true))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -2053,12 +1963,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && !checkForACheck(piece, x, i,true))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !checkForACheck(piece, x, i,true))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -2071,12 +1981,12 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && !checkForACheck(piece, i, y,true))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !checkForACheck(piece, i, y,true))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -2089,25 +1999,25 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && !checkForACheck(piece, i, y,true))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !checkForACheck(piece, i, y,true))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "horse" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
+                else if (piece.Name == "horse" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))
                 {
                     //up left
                     if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value == null && !checkForACheck(piece, x - 1, y - 2, false))
                     {
                         board.Rows[y - 2].Cells[x - 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 2) && !checkForACheck(piece, x - 1, y - 2,true))
+                    else if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 2) && !checkForACheck(piece, x - 1, y - 2,true))
                     {
                         board.Rows[y - 2].Cells[x - 1].Style.BackColor = Color.Red;
                     }
@@ -2117,7 +2027,7 @@ namespace Chess
                     {
                         board.Rows[y - 2].Cells[x + 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y - 2) && !checkForACheck(piece, x + 1, y - 2,true))
+                    else if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 2) && !checkForACheck(piece, x + 1, y - 2,true))
                     {
                         board.Rows[y - 2].Cells[x + 1].Style.BackColor = Color.Red;
                     }
@@ -2127,7 +2037,7 @@ namespace Chess
                     {
                         board.Rows[y - 1].Cells[x + 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x + 2].Value != null && containsEnemy(piece.color, x + 2, y - 1) && !checkForACheck(piece, x + 2, y - 1,true))
+                    else if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x + 2].Value != null && containsEnemy(piece.Color, x + 2, y - 1) && !checkForACheck(piece, x + 2, y - 1,true))
                     {
                         board.Rows[y - 1].Cells[x + 2].Style.BackColor = Color.Red;
                     }
@@ -2137,7 +2047,7 @@ namespace Chess
                     {
                         board.Rows[y + 1].Cells[x + 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value != null && containsEnemy(piece.color, x + 2, y + 1) && !checkForACheck(piece, x + 2, y + 1,true))
+                    else if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value != null && containsEnemy(piece.Color, x + 2, y + 1) && !checkForACheck(piece, x + 2, y + 1,true))
                     {
                         board.Rows[y + 1].Cells[x + 2].Style.BackColor = Color.Red;
                     }
@@ -2147,7 +2057,7 @@ namespace Chess
                     {
                         board.Rows[y + 2].Cells[x - 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 2) && !checkForACheck(piece, x - 1, y + 2,true))
+                    else if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 2) && !checkForACheck(piece, x - 1, y + 2,true))
                     {
                         board.Rows[y + 2].Cells[x - 1].Style.BackColor = Color.Red;
                     }
@@ -2157,7 +2067,7 @@ namespace Chess
                     {
                         board.Rows[y + 2].Cells[x + 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 2) && !checkForACheck(piece, x + 1, y + 2,true))
+                    else if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 2) && !checkForACheck(piece, x + 1, y + 2,true))
                     {
                         board.Rows[y + 2].Cells[x + 1].Style.BackColor = Color.Red;
                     }
@@ -2167,7 +2077,7 @@ namespace Chess
                     {
                         board.Rows[y + 1].Cells[x - 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value != null && containsEnemy(piece.color, x - 2, y + 1) && !checkForACheck(piece, x - 2, y + 1,true))
+                    else if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value != null && containsEnemy(piece.Color, x - 2, y + 1) && !checkForACheck(piece, x - 2, y + 1,true))
                     {
                         board.Rows[y + 1].Cells[x - 2].Style.BackColor = Color.Red;
                     }
@@ -2177,12 +2087,12 @@ namespace Chess
                     {
                         board.Rows[y - 1].Cells[x - 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 2].Value != null && containsEnemy(piece.color, x - 2, y - 1) && !checkForACheck(piece, x - 2, y - 1,true))
+                    else if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 2].Value != null && containsEnemy(piece.Color, x - 2, y - 1) && !checkForACheck(piece, x - 2, y - 1,true))
                     {
                         board.Rows[y - 1].Cells[x - 2].Style.BackColor = Color.Red;
                     }
                 }
-                else if (piece.name == "bishop" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
+                else if (piece.Name == "bishop" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))
                 {
                     int i;
                     int j;
@@ -2199,12 +2109,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -2222,12 +2132,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -2245,12 +2155,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -2268,18 +2178,18 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "queen" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
+                else if (piece.Name == "queen" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))
                 {
                     int i;
                     int j;
@@ -2296,12 +2206,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -2319,12 +2229,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -2342,12 +2252,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -2365,12 +2275,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && !checkForACheck(piece, i, j,true))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !checkForACheck(piece, i, j,true))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -2383,12 +2293,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && !checkForACheck(piece, x, i,true))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !checkForACheck(piece, x, i,true))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -2401,12 +2311,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && !checkForACheck(piece, x, i,true))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !checkForACheck(piece, x, i,true))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -2419,12 +2329,12 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && !checkForACheck(piece, i, y,true))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !checkForACheck(piece, i, y,true))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -2437,20 +2347,20 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && !checkForACheck(piece, i, y,true))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !checkForACheck(piece, i, y,true))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "king" && ((piece.color == Color.White && turn) || (piece.color == Color.Black && !turn)))
+                else if (piece.Name == "king" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))
                 {
-                    List<int[]> future = getCheckTiles(piece.color == Color.White ? Color.Black:Color.White)[1];
+                    List<int[]> future = getCheckTiles(piece.Color == Color.White ? Color.Black:Color.White)[1];
                     //right
                     if (x + 1 < 8)
                     {
@@ -2469,7 +2379,7 @@ namespace Chess
                             {
                                 board.Rows[y].Cells[x + 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y))
+                            else if (board.Rows[y].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y))
                             {
                                 board.Rows[y].Cells[x + 1].Style.BackColor = Color.Red;
                             }
@@ -2495,7 +2405,7 @@ namespace Chess
                             {
                                 board.Rows[y].Cells[x - 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y))
+                            else if (board.Rows[y].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y))
                             {
                                 board.Rows[y].Cells[x - 1].Style.BackColor = Color.Red;
                             }
@@ -2521,7 +2431,7 @@ namespace Chess
                             {
                                 board.Rows[y + 1].Cells[x].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y + 1].Cells[x].Value != null && containsEnemy(piece.color, x, y + 1))
+                            else if (board.Rows[y + 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y + 1))
                             {
                                 board.Rows[y + 1].Cells[x].Style.BackColor = Color.Red;
                             }
@@ -2547,7 +2457,7 @@ namespace Chess
                             {
                                 board.Rows[y - 1].Cells[x].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y - 1].Cells[x].Value != null && containsEnemy(piece.color, x, y - 1))
+                            else if (board.Rows[y - 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y - 1))
                             {
                                 board.Rows[y - 1].Cells[x].Style.BackColor = Color.Red;
                             }
@@ -2573,7 +2483,7 @@ namespace Chess
                             {
                                 board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y - 1))
+                            else if (board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1))
                             {
                                 board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
                             }
@@ -2599,7 +2509,7 @@ namespace Chess
                             {
                                 board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1))
+                            else if (board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1))
                             {
                                 board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
                             }
@@ -2625,7 +2535,7 @@ namespace Chess
                             {
                                 board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 1))
+                            else if (board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1))
                             {
                                 board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Red;
                             }
@@ -2651,7 +2561,7 @@ namespace Chess
                             {
                                 board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 1))
+                            else if (board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1))
                             {
                                 board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Red;
                             }
@@ -2659,7 +2569,7 @@ namespace Chess
                     }
                     //CASTLE
                     //check if white or black
-                    if (piece.color == Color.White)
+                    if (piece.Color == Color.White)
                     {
                         //if king has not moved and the spaces between him and the rook are check free
                         if (!piece.moved)
@@ -2669,22 +2579,22 @@ namespace Chess
 
                             //find kingside rook
                             Piece kingRook = new Piece();
-                            foreach (Piece findRook in pieces)
+                            foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.name == "rook" && findRook.color == piece.color && !findRook.moved && findRook.x == 7)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 7)
                                 {
                                     kingRook = findRook;
                                 }
                             }
 
                             //check if rook was found successfully and the spots between king and rook are empty
-                            if (kingRook.name == "rook" && board.Rows[y].Cells[piece.x + 1].Value == null && board.Rows[y].Cells[piece.x + 2].Value == null)
+                            if (kingRook.Name == "rook" && board.Rows[y].Cells[piece.X + 1].Value == null && board.Rows[y].Cells[piece.X + 2].Value == null)
                             {
                                 //check each future move of the enemy to see if spaces in between king and rook are not in check
                                 foreach (int[] tile in future)
                                 {
                                     //if the 2 spots are checkable, castle is illegal
-                                    if ((piece.x + 1 == tile[0] && piece.y == tile[1]) || (piece.x + 2 == tile[0] && piece.y == tile[1]))
+                                    if ((piece.X + 1 == tile[0] && piece.Y == tile[1]) || (piece.X + 2 == tile[0] && piece.Y == tile[1]))
                                     {
                                         castle = false;
                                     }
@@ -2692,7 +2602,7 @@ namespace Chess
 
                                 if (castle)
                                 {
-                                    board.Rows[kingRook.y].Cells[kingRook.x].Style.BackColor = Color.Green;
+                                    board.Rows[kingRook.Y].Cells[kingRook.X].Style.BackColor = Color.Green;
                                 }
                             }
 
@@ -2702,22 +2612,22 @@ namespace Chess
 
                             //find kingside rook
                             Piece queenRook = new Piece();
-                            foreach (Piece findRook in pieces)
+                            foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.name == "rook" && findRook.color == piece.color && !findRook.moved && findRook.x == 0)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 0)
                                 {
                                     queenRook = findRook;
                                 }
                             }
 
                             //check if rook was found successfully and the spots between king and rook are empty
-                            if (queenRook.name == "rook" && board.Rows[y].Cells[piece.x - 1].Value == null && board.Rows[y].Cells[piece.x - 2].Value == null && board.Rows[y].Cells[piece.x - 3].Value == null)
+                            if (queenRook.Name == "rook" && board.Rows[y].Cells[piece.X - 1].Value == null && board.Rows[y].Cells[piece.X - 2].Value == null && board.Rows[y].Cells[piece.X - 3].Value == null)
                             {
                                 //check each future move of the enemy to see if spaces in between king and rook are not in check
                                 foreach (int[] tile in future)
                                 {
                                     //if the 2 spots are checkable, castle is illegal
-                                    if ((piece.x - 1 == tile[0] && piece.y == tile[1]) || (piece.x - 2 == tile[0] && piece.y == tile[1]))
+                                    if ((piece.X - 1 == tile[0] && piece.Y == tile[1]) || (piece.X - 2 == tile[0] && piece.Y == tile[1]))
                                     {
                                         castle = false;
                                     }
@@ -2725,7 +2635,7 @@ namespace Chess
 
                                 if (castle)
                                 {
-                                    board.Rows[queenRook.y].Cells[queenRook.x].Style.BackColor = Color.Green;
+                                    board.Rows[queenRook.Y].Cells[queenRook.X].Style.BackColor = Color.Green;
                                 }
                             }
                         }
@@ -2740,22 +2650,22 @@ namespace Chess
 
                             //find kingside rook
                             Piece kingRook = new Piece();
-                            foreach (Piece findRook in pieces)
+                            foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.name == "rook" && findRook.color == piece.color && !findRook.moved && findRook.x == 0)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 0)
                                 {
                                     kingRook = findRook;
                                 }
                             }
 
                             //check if rook was found successfully and the spots between king and rook are empty
-                            if (kingRook.name == "rook" && board.Rows[y].Cells[piece.x - 1].Value == null && board.Rows[y].Cells[piece.x - 2].Value == null)
+                            if (kingRook.Name == "rook" && board.Rows[y].Cells[piece.X - 1].Value == null && board.Rows[y].Cells[piece.X - 2].Value == null)
                             {
                                 //check each future move of the enemy to see if spaces in between king and rook are not in check
                                 foreach (int[] tile in future)
                                 {
                                     //if the 2 spots are checkable, castle is illegal
-                                    if ((piece.x - 1 == tile[0] && piece.y == tile[1]) || (piece.x - 2 == tile[0] && piece.y == tile[1]))
+                                    if ((piece.X - 1 == tile[0] && piece.Y == tile[1]) || (piece.X - 2 == tile[0] && piece.Y == tile[1]))
                                     {
                                         castle = false;
                                     }
@@ -2763,7 +2673,7 @@ namespace Chess
 
                                 if (castle)
                                 {
-                                    board.Rows[kingRook.y].Cells[kingRook.x].Style.BackColor = Color.Green;
+                                    board.Rows[kingRook.Y].Cells[kingRook.X].Style.BackColor = Color.Green;
                                 }
                             }
 
@@ -2773,22 +2683,22 @@ namespace Chess
 
                             //find kingside rook
                             Piece queenRook = new Piece();
-                            foreach (Piece findRook in pieces)
+                            foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.name == "rook" && findRook.color == piece.color && !findRook.moved && findRook.x == 7)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 7)
                                 {
                                     queenRook = findRook;
                                 }
                             }
 
                             //check if rook was found successfully and the spots between king and rook are empty
-                            if (queenRook.name == "rook" && board.Rows[y].Cells[piece.x + 1].Value == null && board.Rows[y].Cells[piece.x + 2].Value == null && board.Rows[y].Cells[piece.x + 3].Value == null)
+                            if (queenRook.Name == "rook" && board.Rows[y].Cells[piece.X + 1].Value == null && board.Rows[y].Cells[piece.X + 2].Value == null && board.Rows[y].Cells[piece.X + 3].Value == null)
                             {
                                 //check each future move of the enemy to see if spaces in between king and rook are not in check
                                 foreach (int[] tile in future)
                                 {
                                     //if the 2 spots are checkable, castle is illegal
-                                    if ((piece.x + 1 == tile[0] && piece.y == tile[1]) || (piece.x + 2 == tile[0] && piece.y == tile[1]))
+                                    if ((piece.X + 1 == tile[0] && piece.Y == tile[1]) || (piece.X + 2 == tile[0] && piece.Y == tile[1]))
                                     {
                                         castle = false;
                                     }
@@ -2796,7 +2706,7 @@ namespace Chess
 
                                 if (castle)
                                 {
-                                    board.Rows[queenRook.y].Cells[queenRook.x].Style.BackColor = Color.Green;
+                                    board.Rows[queenRook.Y].Cells[queenRook.X].Style.BackColor = Color.Green;
                                 }
                             }
                         }
@@ -2807,14 +2717,14 @@ namespace Chess
             }
             else
             {
-                List<int[]>[] getCheck = getCheckTiles(piece.color == Color.White ? Color.Black:Color.White);
+                List<int[]>[] getCheck = getCheckTiles(piece.Color == Color.White ? Color.Black:Color.White);
                 List<int[]> threats = getCheck[0];
                 List<int[]> future = getCheck[1];
 
-                int x = piece.x;
-                int y = piece.y;
+                int x = piece.X;
+                int y = piece.Y;
 
-                if (piece.name == "king")
+                if (piece.Name == "king")
                 {
                     int newy = y - 1;
                     //up
@@ -2845,7 +2755,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newy > -1 && newy < 8 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.color, x, newy))
+                    else if (newy > -1 && newy < 8 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.Color, x, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -2901,7 +2811,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newy < 8 && newy > -1 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.color, x, newy))
+                    else if (newy < 8 && newy > -1 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.Color, x, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -2956,7 +2866,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx > -1 && newx < 8 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.color, newx, y))
+                    else if (newx > -1 && newx < 8 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.Color, newx, y))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -3011,7 +2921,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx < 8 && newx > -1 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.color, newx, y))
+                    else if (newx < 8 && newx > -1 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.Color, newx, y))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -3067,7 +2977,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx > -1 && newy > -1 && newx < 8 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx > -1 && newy > -1 && newx < 8 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -3123,7 +3033,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx < 8 && newy > -1 && newx > -1 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx < 8 && newy > -1 && newx > -1 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -3179,7 +3089,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx > -1 && newy < 8 && newx < 8 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx > -1 && newy < 8 && newx < 8 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -3235,7 +3145,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx < 8 && newy < 8 && newx > -1 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx < 8 && newy < 8 && newx > -1 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -3261,7 +3171,7 @@ namespace Chess
                         }
                     }
                 }
-                else if (piece.name == "pawn")
+                else if (piece.Name == "pawn")
                 {
                     int newy = y - 1;
                     //up
@@ -3325,35 +3235,22 @@ namespace Chess
                         }
                     }
 
-                    //left en Passant
-                    if (x - 1 > -1 && y - 1 > -1 && board.Rows[y].Cells[x - 1].Value != null && board.Rows[y - 1].Cells[x - 1].Value == null && containsEnemy(piece.color, x - 1, y) && !checkForACheck(piece, x - 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x - 1 && int.Parse(lastMove[3]) == y)
+                    if (Pieces.Find(k => k.X == x - 1 && k.Y == y).Name == "pawn")
                     {
-                        foreach (int[] tile in threats)
+                        //left en Passant
+                        if (x - 1 > -1 && y - 1 > -1 && board.Rows[y].Cells[x - 1].Value != null && board.Rows[y - 1].Cells[x - 1].Value == null && containsEnemy(piece.Color, x - 1, y) && !checkForACheck(piece, x - 1, y - 1, true) && doubleMove == true && lastMove.Item1 == x - 1 && lastMove.Item2 == y)
                         {
-                            if (tile[0] == x - 1 && tile[1] == y)
-                            {
-                                board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
-                                enPassant = true;
-                                break;
-                            }
+                            board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
                         }
-                    }
 
-                    //right en Passant
-                    if (x + 1 < 8 && y - 1 > -1 && board.Rows[y].Cells[x + 1].Value != null && board.Rows[y - 1].Cells[x + 1].Value == null && containsEnemy(piece.color, x + 1, y) && !checkForACheck(piece, x + 1, y - 1, true) && lastMove[0] == "pawn" && lastMove[1] == "double move" && int.Parse(lastMove[2]) == x + 1 && int.Parse(lastMove[3]) == y)
-                    {
-                        foreach (int[] tile in threats)
+                        //right en Passant
+                        if (x + 1 < 8 && y - 1 > -1 && board.Rows[y].Cells[x + 1].Value != null && board.Rows[y - 1].Cells[x + 1].Value == null && containsEnemy(piece.Color, x + 1, y) && !checkForACheck(piece, x + 1, y - 1, true) && doubleMove == true && lastMove.Item1 == x + 1 && lastMove.Item2 == y)
                         {
-                            if (tile[0] == x + 1 && tile[1] == y - 1)
-                            {
-                                board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
-                                enPassant = true;
-                                break;
-                            }
+                            board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
                         }
                     }
                 }
-                else if (piece.name == "rook")
+                else if (piece.Name == "rook")
                 {
                     //above (i represents y/row)
                     for (int i = y - 1; i > -1; i--)
@@ -3368,7 +3265,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3379,7 +3276,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -3398,7 +3295,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3409,7 +3306,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -3428,7 +3325,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3439,7 +3336,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -3458,7 +3355,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3469,14 +3366,14 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
                     }
 
                 }
-                else if (piece.name == "horse")
+                else if (piece.Name == "horse")
                 {
                     int newx = x - 1;
                     int newy = y - 2;
@@ -3491,7 +3388,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3515,7 +3412,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3539,7 +3436,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3563,7 +3460,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3587,7 +3484,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3611,7 +3508,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3635,7 +3532,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3659,7 +3556,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -3670,7 +3567,7 @@ namespace Chess
                         }
                     }
                 }
-                else if (piece.name == "bishop")
+                else if (piece.Name == "bishop")
                 {
                     int i;
                     int j;
@@ -3692,7 +3589,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3703,7 +3600,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -3727,7 +3624,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3738,7 +3635,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -3762,7 +3659,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3773,7 +3670,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -3797,7 +3694,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3808,13 +3705,13 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "queen")
+                else if (piece.Name == "queen")
                 {
                     int i;
                     int j;
@@ -3836,7 +3733,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3847,7 +3744,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -3871,7 +3768,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3882,7 +3779,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -3906,7 +3803,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3917,7 +3814,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -3941,7 +3838,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3952,7 +3849,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -3971,7 +3868,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -3982,7 +3879,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -4001,7 +3898,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -4012,7 +3909,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -4031,7 +3928,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -4042,7 +3939,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -4061,7 +3958,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -4072,7 +3969,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -4080,23 +3977,17 @@ namespace Chess
                 }
             }
 
-            foreach (DataGridViewRow row in board.Rows)
-            {
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    if (cell.Style.BackColor == Color.Blue)
-                    {
-                        foreach (Piece findPiece in pieces)
-                        {
-                            if (findPiece.x == cell.ColumnIndex && findPiece.y == cell.RowIndex)
-                            {
-                                //just change it to anythign other than blue so the algorithm doesnt get confused. It'll all get sorted out when ogColors() is called later
-                                ogColor(cell.ColumnIndex,cell.RowIndex);
-                            }
-                        }
-                    }
-                }
-            }
+            //idk why this is here. Uncomment this if you need it later
+            //foreach (DataGridViewRow row in board.Rows)
+            //{
+            //    foreach (DataGridViewCell cell in row.Cells)
+            //    {
+            //        if (cell.Style.BackColor == Color.Blue)
+            //        {
+            //            ogColor(cell.ColumnIndex, cell.RowIndex);
+            //        }
+            //    }
+            //}
         }
 
         /// <summary>
@@ -4108,15 +3999,15 @@ namespace Chess
         {
             if (!check)
             {
-                int x = piece.x;
-                int y = piece.y;
-                if (piece.name == "pawn" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                int x = piece.X;
+                int y = piece.Y;
+                if (piece.Name == "pawn" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
                 {
-                    if (x - 1 != -1 && y - 1 != -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1))
+                    if (x - 1 != -1 && y - 1 != -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1))
                     {
                         board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
                     }
-                    if (x + 1 != 8 && y - 1 != -1 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y - 1))
+                    if (x + 1 != 8 && y - 1 != -1 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1))
                     {
                         board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
                     }
@@ -4133,7 +4024,7 @@ namespace Chess
                         board.Rows[y + 1].Cells[x].Style.BackColor = Color.Purple;
                     }
                 }
-                else if (piece.name == "rook" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                else if (piece.Name == "rook" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
                 {
                     //above (i represents y/row)
                     for (int i = y - 1; i > -1; i--)
@@ -4142,12 +4033,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -4160,12 +4051,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -4178,12 +4069,12 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -4196,25 +4087,25 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "horse" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                else if (piece.Name == "horse" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
                 {
                     //up left
                     if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value == null)
                     {
                         board.Rows[y - 2].Cells[x - 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 2))
+                    else if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 2))
                     {
                         board.Rows[y - 2].Cells[x - 1].Style.BackColor = Color.Red;
                     }
@@ -4224,7 +4115,7 @@ namespace Chess
                     {
                         board.Rows[y - 2].Cells[x + 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y - 2))
+                    else if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 2))
                     {
                         board.Rows[y - 2].Cells[x + 1].Style.BackColor = Color.Red;
                     }
@@ -4234,7 +4125,7 @@ namespace Chess
                     {
                         board.Rows[y - 1].Cells[x + 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x + 2].Value != null && containsEnemy(piece.color, x + 2, y - 1))
+                    else if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x + 2].Value != null && containsEnemy(piece.Color, x + 2, y - 1))
                     {
                         board.Rows[y - 1].Cells[x + 2].Style.BackColor = Color.Red;
                     }
@@ -4244,7 +4135,7 @@ namespace Chess
                     {
                         board.Rows[y + 1].Cells[x + 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value != null && containsEnemy(piece.color, x + 2, y + 1))
+                    else if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value != null && containsEnemy(piece.Color, x + 2, y + 1))
                     {
                         board.Rows[y + 1].Cells[x + 2].Style.BackColor = Color.Red;
                     }
@@ -4254,7 +4145,7 @@ namespace Chess
                     {
                         board.Rows[y + 2].Cells[x - 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 2))
+                    else if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 2))
                     {
                         board.Rows[y + 2].Cells[x - 1].Style.BackColor = Color.Red;
                     }
@@ -4264,7 +4155,7 @@ namespace Chess
                     {
                         board.Rows[y + 2].Cells[x + 1].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 2))
+                    else if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 2))
                     {
                         board.Rows[y + 2].Cells[x + 1].Style.BackColor = Color.Red;
                     }
@@ -4274,7 +4165,7 @@ namespace Chess
                     {
                         board.Rows[y + 1].Cells[x - 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value != null && containsEnemy(piece.color, x - 2, y + 1))
+                    else if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value != null && containsEnemy(piece.Color, x - 2, y + 1))
                     {
                         board.Rows[y + 1].Cells[x - 2].Style.BackColor = Color.Red;
                     }
@@ -4284,12 +4175,12 @@ namespace Chess
                     {
                         board.Rows[y - 1].Cells[x - 2].Style.BackColor = Color.Blue;
                     }
-                    else if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 2].Value != null && containsEnemy(piece.color, x - 2, y - 1))
+                    else if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 2].Value != null && containsEnemy(piece.Color, x - 2, y - 1))
                     {
                         board.Rows[y - 1].Cells[x - 2].Style.BackColor = Color.Red;
                     }
                 }
-                else if (piece.name == "bishop" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                else if (piece.Name == "bishop" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
                 {
                     int i;
                     int j;
@@ -4306,12 +4197,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -4329,12 +4220,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -4352,12 +4243,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -4375,18 +4266,18 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "queen" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                else if (piece.Name == "queen" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
                 {
                     int i;
                     int j;
@@ -4403,12 +4294,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -4426,12 +4317,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -4449,12 +4340,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -4472,12 +4363,12 @@ namespace Chess
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             board.Rows[j].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -4490,12 +4381,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -4508,12 +4399,12 @@ namespace Chess
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             board.Rows[i].Cells[x].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -4526,12 +4417,12 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -4544,20 +4435,20 @@ namespace Chess
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Blue;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             board.Rows[y].Cells[i].Style.BackColor = Color.Red;
                             break;
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "king" && ((piece.color == Color.White && !turn) || (piece.color == Color.Black && turn)))
+                else if (piece.Name == "king" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
                 {
-                    List<int[]> future = getCheckTiles(piece.color == Color.White ? Color.Black : Color.White)[1];
+                    List<int[]> future = getCheckTiles(piece.Color == Color.White ? Color.Black : Color.White)[1];
                     //right
                     if (x + 1 < 8)
                     {
@@ -4576,7 +4467,7 @@ namespace Chess
                             {
                                 board.Rows[y].Cells[x + 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y))
+                            else if (board.Rows[y].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y))
                             {
                                 board.Rows[y].Cells[x + 1].Style.BackColor = Color.Red;
                             }
@@ -4602,7 +4493,7 @@ namespace Chess
                             {
                                 board.Rows[y].Cells[x - 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y))
+                            else if (board.Rows[y].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y))
                             {
                                 board.Rows[y].Cells[x - 1].Style.BackColor = Color.Red;
                             }
@@ -4628,7 +4519,7 @@ namespace Chess
                             {
                                 board.Rows[y + 1].Cells[x].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y + 1].Cells[x].Value != null && containsEnemy(piece.color, x, y + 1))
+                            else if (board.Rows[y + 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y + 1))
                             {
                                 board.Rows[y + 1].Cells[x].Style.BackColor = Color.Red;
                             }
@@ -4654,7 +4545,7 @@ namespace Chess
                             {
                                 board.Rows[y - 1].Cells[x].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y - 1].Cells[x].Value != null && containsEnemy(piece.color, x, y - 1))
+                            else if (board.Rows[y - 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y - 1))
                             {
                                 board.Rows[y - 1].Cells[x].Style.BackColor = Color.Red;
                             }
@@ -4680,7 +4571,7 @@ namespace Chess
                             {
                                 board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y - 1))
+                            else if (board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1))
                             {
                                 board.Rows[y - 1].Cells[x + 1].Style.BackColor = Color.Red;
                             }
@@ -4706,7 +4597,7 @@ namespace Chess
                             {
                                 board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y - 1))
+                            else if (board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1))
                             {
                                 board.Rows[y - 1].Cells[x - 1].Style.BackColor = Color.Red;
                             }
@@ -4732,7 +4623,7 @@ namespace Chess
                             {
                                 board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.color, x + 1, y + 1))
+                            else if (board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1))
                             {
                                 board.Rows[y + 1].Cells[x + 1].Style.BackColor = Color.Red;
                             }
@@ -4758,7 +4649,7 @@ namespace Chess
                             {
                                 board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Blue;
                             }
-                            else if (board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.color, x - 1, y + 1))
+                            else if (board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1))
                             {
                                 board.Rows[y + 1].Cells[x - 1].Style.BackColor = Color.Red;
                             }
@@ -4773,22 +4664,22 @@ namespace Chess
 
                         //find kingside rook
                         Piece kingRook = new Piece();
-                        foreach (Piece findRook in pieces)
+                        foreach (Piece findRook in Pieces)
                         {
-                            if (findRook.name == "rook" && findRook.color == piece.color && !findRook.moved && findRook.x == 7)
+                            if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 7)
                             {
                                 kingRook = findRook;
                             }
                         }
 
                         //check if rook was found successfully and the spots between king and rook are empty
-                        if (kingRook.name == "rook" && board.Rows[y].Cells[piece.x + 1].Value == null && board.Rows[y].Cells[piece.x + 2].Value == null)
+                        if (kingRook.Name == "rook" && board.Rows[y].Cells[piece.X + 1].Value == null && board.Rows[y].Cells[piece.X + 2].Value == null)
                         {
                             //check each future move of the enemy to see if spaces in between king and rook are not in check
                             foreach (int[] tile in future)
                             {
                                 //if the 2 spots are checkable, castle is illegal
-                                if ((piece.x + 1 == tile[0] && piece.y == tile[1]) || (piece.x + 2 == tile[0] && piece.y == tile[1]))
+                                if ((piece.X + 1 == tile[0] && piece.Y == tile[1]) || (piece.X + 2 == tile[0] && piece.Y == tile[1]))
                                 {
                                     castle = false;
                                 }
@@ -4796,7 +4687,7 @@ namespace Chess
 
                             if (castle)
                             {
-                                board.Rows[kingRook.y].Cells[kingRook.x].Style.BackColor = Color.Green;
+                                board.Rows[kingRook.Y].Cells[kingRook.X].Style.BackColor = Color.Green;
                             }
                         }
 
@@ -4806,22 +4697,22 @@ namespace Chess
 
                         //find kingside rook
                         Piece queenRook = new Piece();
-                        foreach (Piece findRook in pieces)
+                        foreach (Piece findRook in Pieces)
                         {
-                            if (findRook.name == "rook" && findRook.color == piece.color && !findRook.moved && findRook.x == 0)
+                            if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 0)
                             {
                                 queenRook = findRook;
                             }
                         }
 
                         //check if rook was found successfully and the spots between king and rook are empty
-                        if (queenRook.name == "rook" && board.Rows[y].Cells[piece.x - 1].Value == null && board.Rows[y].Cells[piece.x - 2].Value == null && board.Rows[y].Cells[piece.x - 3].Value == null)
+                        if (queenRook.Name == "rook" && board.Rows[y].Cells[piece.X - 1].Value == null && board.Rows[y].Cells[piece.X - 2].Value == null && board.Rows[y].Cells[piece.X - 3].Value == null)
                         {
                             //check each future move of the enemy to see if spaces in between king and rook are not in check
                             foreach (int[] tile in future)
                             {
                                 //if the 2 spots are checkable, castle is illegal
-                                if ((piece.x - 1 == tile[0] && piece.y == tile[1]) || (piece.x - 2 == tile[0] && piece.y == tile[1]))
+                                if ((piece.X - 1 == tile[0] && piece.Y == tile[1]) || (piece.X - 2 == tile[0] && piece.Y == tile[1]))
                                 {
                                     castle = false;
                                 }
@@ -4829,7 +4720,7 @@ namespace Chess
 
                             if (castle)
                             {
-                                board.Rows[queenRook.y].Cells[queenRook.x].Style.BackColor = Color.Green;
+                                board.Rows[queenRook.Y].Cells[queenRook.X].Style.BackColor = Color.Green;
                             }
                         }
                     }
@@ -4838,14 +4729,14 @@ namespace Chess
             }
             else
             {
-                List<int[]>[] getCheck = getCheckTiles(piece.color == Color.White ? Color.Black : Color.White);
+                List<int[]>[] getCheck = getCheckTiles(piece.Color == Color.White ? Color.Black : Color.White);
                 List<int[]> threats = getCheck[0];
                 List<int[]> future = getCheck[1];
 
-                int x = piece.x;
-                int y = piece.y;
+                int x = piece.X;
+                int y = piece.Y;
 
-                if (piece.name == "king")
+                if (piece.Name == "king")
                 {
                     int newy = y - 1;
                     //up
@@ -4876,7 +4767,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newy > -1 && newy < 8 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.color, x, newy))
+                    else if (newy > -1 && newy < 8 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.Color, x, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -4931,7 +4822,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newy < 8 && newy > -1 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.color, x, newy))
+                    else if (newy < 8 && newy > -1 && board.Rows[newy].Cells[x].Value != null && containsEnemy(piece.Color, x, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -4986,7 +4877,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx > -1 && newx < 8 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.color, newx, y))
+                    else if (newx > -1 && newx < 8 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.Color, newx, y))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -5041,7 +4932,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx > -1 && newx > -1 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.color, newx, y))
+                    else if (newx > -1 && newx > -1 && board.Rows[y].Cells[newx].Value != null && containsEnemy(piece.Color, newx, y))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -5097,7 +4988,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx > -1 && newy > -1 && newx < 8 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx > -1 && newy > -1 && newx < 8 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -5153,7 +5044,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx < 8 && newy > -1 && newx > -1 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx < 8 && newy > -1 && newx > -1 && newy < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -5209,7 +5100,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx > -1 && newy < 8 && newx < 8 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx > -1 && newy < 8 && newx < 8 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -5265,7 +5156,7 @@ namespace Chess
                         }
                     }
                     //if an enemy is on that tile
-                    else if (newx < 8 && newy < 8 && newx > -1 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newx < 8 && newy < 8 && newx > -1 && newy > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         bool open = true;
                         foreach (int[] tile in future)
@@ -5291,7 +5182,7 @@ namespace Chess
                         }
                     }
                 }
-                else if (piece.name == "pawn")
+                else if (piece.Name == "pawn")
                 {
                     int newy = y - 1;
                     //up
@@ -5355,7 +5246,7 @@ namespace Chess
                         }
                     }
                 }
-                else if (piece.name == "rook")
+                else if (piece.Name == "rook")
                 {
                     //above (i represents y/row)
                     for (int i = y - 1; i > -1; i--)
@@ -5370,7 +5261,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5381,7 +5272,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -5400,7 +5291,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5411,7 +5302,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -5430,7 +5321,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5441,7 +5332,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -5460,7 +5351,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5471,14 +5362,14 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
                     }
 
                 }
-                else if (piece.name == "horse")
+                else if (piece.Name == "horse")
                 {
                     int newx = x - 1;
                     int newy = y - 2;
@@ -5493,7 +5384,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5517,7 +5408,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5541,7 +5432,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5565,7 +5456,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5589,7 +5480,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx < 8 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5613,7 +5504,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5637,7 +5528,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy < 8 && newx > -1 && board.Rows[newy].Cells[newx].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5661,7 +5552,7 @@ namespace Chess
                             }
                         }
                     }
-                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.color, newx, newy))
+                    else if (newy > -1 && newx > -1 && board.Rows[newy].Cells[x - 1].Value != null && containsEnemy(piece.Color, newx, newy))
                     {
                         foreach (int[] tile in threats)
                         {
@@ -5672,7 +5563,7 @@ namespace Chess
                         }
                     }
                 }
-                else if (piece.name == "bishop")
+                else if (piece.Name == "bishop")
                 {
                     int i;
                     int j;
@@ -5694,7 +5585,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5705,7 +5596,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -5729,7 +5620,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5740,7 +5631,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -5764,7 +5655,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5775,7 +5666,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -5799,7 +5690,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5810,13 +5701,13 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
                     }
                 }
-                else if (piece.name == "queen")
+                else if (piece.Name == "queen")
                 {
                     int i;
                     int j;
@@ -5838,7 +5729,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5849,7 +5740,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -5873,7 +5764,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5884,7 +5775,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -5908,7 +5799,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5919,7 +5810,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -5943,7 +5834,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5954,7 +5845,7 @@ namespace Chess
                             }
                             break;
                         }
-                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                        else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                         {
                             break;
                         }
@@ -5973,7 +5864,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -5984,7 +5875,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -6003,7 +5894,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -6014,7 +5905,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                        else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                         {
                             break;
                         }
@@ -6033,7 +5924,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -6044,7 +5935,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -6063,7 +5954,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
                         {
                             foreach (int[] tile in threats)
                             {
@@ -6074,7 +5965,7 @@ namespace Chess
                                 }
                             }
                         }
-                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                        else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                         {
                             break;
                         }
@@ -6111,12 +6002,8 @@ namespace Chess
         /// <returns></returns>
         public bool checkForACheck(Piece piece, int newx, int newy, bool killed)
         {
-            List<Piece> testPieces = new List<Piece>();
-            //hard copy of pieces
-            foreach (Piece copy in pieces)
-            {
-                testPieces.Add(copy);
-            }
+            //hard copy of Pieces list
+            List<Piece> testPieces = new List<Piece>(Pieces);
 
             //stores all the already highlighted spaces
             //int[2] = 0 is blue
@@ -6148,25 +6035,35 @@ namespace Chess
             }
 
             //move to new spot
-            int oldx = piece.x;
-            int oldy = piece.y;
-            piece.x = newx;
-            piece.y = newy;
+            int oldx = piece.X;
+            int oldy = piece.Y;
+            piece.X = newx;
+            piece.Y = newy;
             board.Rows[oldy].Cells[oldx].Value = null;
-            board.Rows[newy].Cells[newx].Value = piece.icon;
+            board.Rows[newy].Cells[newx].Value = piece.Icon;
+
 
             Piece kill = new Piece();
             if (killed)
             {
+                try
+                {
+                    kill = Pieces.Find(k => k.X == newx && k.Y == newy && k != piece);
+                    testPieces.Remove(kill);
+                }
+                catch (ArgumentNullException)
+                {
+
+                }
                 //see if that spot would be a kill
                 foreach (Piece found in testPieces)
                 {
-                    if (found != piece && found.x == newx && found.y == newy)
+                    if (found != piece && found.X == newx && found.Y == newy)
                     {
                         kill = found;
                     }
                 }
-                if (kill.x != -1)
+                if (kill.X != -1)
                 {
                     testPieces.Remove(kill);
                 }
@@ -6175,22 +6072,14 @@ namespace Chess
             //highlights all spaces
             foreach (Piece check in testPieces)
             {
-                if (check.color != piece.color)
+                if (check.Color != piece.Color)
                 {
                     oldHighlightSpaces(check, false);
                 }
             }
 
             //find the king 
-            Piece king = new Piece();
-            foreach (Piece findKing in testPieces)
-            {
-                if (findKing.name == "king" && findKing.color == piece.color)
-                {
-                    king = findKing;
-                    break;
-                }
-            }
+            Piece king = Pieces.Find(k => k.Name == "king" && k.Color == piece.Color);
 
             //see if any red spaces hold the king
             bool checkd = false;
@@ -6198,7 +6087,7 @@ namespace Chess
             {
                 foreach (DataGridViewImageCell cell in row.Cells)
                 {
-                    if (cell.Style.BackColor == Color.Red && cell.RowIndex == king.y && cell.ColumnIndex == king.x)
+                    if (cell.Style.BackColor == Color.Red && cell.RowIndex == king.Y && cell.ColumnIndex == king.X)
                     {
                         checkd = true;
                     }
@@ -6207,14 +6096,14 @@ namespace Chess
 
             //reset back to before
             board.Rows[newy].Cells[newx].Value = null;
-            if (kill.x != -1)
+            if (kill.X != -1)
             {
                 testPieces.Add(kill);
-                board.Rows[kill.y].Cells[kill.x].Value = kill.icon;
+                board.Rows[kill.Y].Cells[kill.X].Value = kill.Icon;
             }
-            piece.x = oldx;
-            piece.y = oldy;
-            board.Rows[oldy].Cells[oldx].Value = piece.icon;
+            piece.X = oldx;
+            piece.Y = oldy;
+            board.Rows[oldy].Cells[oldx].Value = piece.Icon;
 
             ogColor();
             foreach (int[] tile in highlights)
@@ -6249,9 +6138,9 @@ namespace Chess
         /// <returns>True = that space does contain an enemy. False = that space doesn't contain an enemy</returns>
         public bool containsEnemy(Color color, int x, int y)
         {
-            foreach(Piece piece in pieces)
+            foreach(Piece piece in Pieces)
             {
-                if(color != piece.color && piece.x == x && piece.y == y)
+                if(color != piece.Color && piece.X == x && piece.Y == y)
                 {
                     return true;
                 }
@@ -6297,24 +6186,17 @@ namespace Chess
         public Piece preventCheck(Piece protector)
         {
             //find the king
-            Piece king = new Piece();
-            foreach (Piece piece in pieces)
-            {
-                if (piece.name == "king" && piece.color == protector.color)
-                {
-                    king = piece;
-                }
-            }
+            Piece king = Pieces.Find(k => k.Name == "king" && k.Color == protector.Color);
 
             //iterate through the enemy to see if there is a path for them to check if protector were to move
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in Pieces)
             {
                 //ignores if the piece is on the side of the protector
-                if (protector.color != piece.color)
+                if (protector.Color != piece.Color)
                 {
-                    int x = piece.x;
-                    int y = piece.y;
-                    if (piece.name == "rook")
+                    int x = piece.X;
+                    int y = piece.Y;
+                    if (piece.Name == "rook")
                     {
                         //records if a peice is in the way between a check
                         bool Protected = false;
@@ -6325,23 +6207,23 @@ namespace Chess
                         for (int i = y - 1; i > -1; i--)
                         {
                             //if there is king along the piece's path
-                            if (king.x == x && king.y == i)
+                            if (king.X == x && king.Y == i)
                             {
                                 kingInPath = true;
                                 break;
                             }
                             //if there is already someone blocking piece's path on protector's team, then anyways theres no need for protector to be restricted since his teamate is covering him
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && (protector.x != x || protector.y != i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && (protector.X != x || protector.Y != i))
                             {
                                 break;
                             }
                             //if the protector is first in the path of the piece
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && protector.x == x && protector.y == i)
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && protector.X == x && protector.Y == i)
                             {
                                 Protected = true;
                             }
                             //if piece is blocoked by his own teammate, there is no need to see if protector is in the way or if protector's king is in the way
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 break;
                             }
@@ -6360,20 +6242,20 @@ namespace Chess
                         //below (i represents y/row)
                         for (int i = y + 1; i < 8; i++)
                         {
-                            if (king.x == x && king.y == i)
+                            if (king.X == x && king.Y == i)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && (protector.x != x || protector.y != i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && (protector.X != x || protector.Y != i))
                             {
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && protector.x == x && protector.y == i)
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && protector.X == x && protector.Y == i)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 break;
                             }
@@ -6392,20 +6274,20 @@ namespace Chess
                         //left (i represents x/column)
                         for (int i = x - 1; i > -1; i--)
                         {
-                            if (king.x == i && king.y == y)
+                            if (king.X == i && king.Y == y)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && (protector.x != i || protector.y != y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && (protector.X != i || protector.Y != y))
                             {
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && protector.x == i && protector.y == y)
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && protector.X == i && protector.Y == y)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 break;
                             }
@@ -6424,20 +6306,20 @@ namespace Chess
                         //right (i represents x/column)
                         for (int i = x + 1; i < 8; i++)
                         {
-                            if (king.x == i && king.y == y)
+                            if (king.X == i && king.Y == y)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && (protector.x != i || protector.y != y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && (protector.X != i || protector.Y != y))
                             {
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && protector.x == i && protector.y == y)
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && protector.X == i && protector.Y == y)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 break;
                             }
@@ -6453,7 +6335,7 @@ namespace Chess
                             kingInPath = false;
                         }
                     }
-                    else if (piece.name == "bishop")
+                    else if (piece.Name == "bishop")
                     {
                         //records if a peice is in the way between a check
                         bool Protected = false;
@@ -6471,20 +6353,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6508,20 +6390,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6545,20 +6427,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6582,20 +6464,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6611,7 +6493,7 @@ namespace Chess
                             kingInPath = false;
                         }
                     }
-                    else if (piece.name == "queen")
+                    else if (piece.Name == "queen")
                     {
                         //records if a peice is in the way between a check
                         bool Protected = false;
@@ -6624,20 +6506,20 @@ namespace Chess
 
                         for (i = y - 1; i > -1; i--)
                         {
-                            if (king.x == x && king.y == i)
+                            if (king.X == x && king.Y == i)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && (protector.x != x || protector.y != i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && (protector.X != x || protector.Y != i))
                             {
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && protector.x == x && protector.y == i)
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && protector.X == x && protector.Y == i)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 break;
                             }
@@ -6656,20 +6538,20 @@ namespace Chess
                         //below (i represents y/row)
                         for (i = y + 1; i < 8; i++)
                         {
-                            if (king.x == x && king.y == i)
+                            if (king.X == x && king.Y == i)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && (protector.x != x || protector.y != i))
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && (protector.X != x || protector.Y != i))
                             {
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.color, x, i) && protector.x == x && protector.y == i)
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && protector.X == x && protector.Y == i)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
                             {
                                 break;
                             }
@@ -6688,20 +6570,20 @@ namespace Chess
                         //left (i represents x/column)
                         for (i = x - 1; i > -1; i--)
                         {
-                            if (king.x == i && king.y == y)
+                            if (king.X == i && king.Y == y)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && (protector.x != i || protector.y != y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && (protector.X != i || protector.Y != y))
                             {
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && protector.x == i && protector.y == y)
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && protector.X == i && protector.Y == y)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 break;
                             }
@@ -6720,20 +6602,20 @@ namespace Chess
                         //right (i represents x/column)
                         for (i = x + 1; i < 8; i++)
                         {
-                            if (king.x == i && king.y == y)
+                            if (king.X == i && king.Y == y)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && (protector.x != i || protector.y != y))
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && (protector.X != i || protector.Y != y))
                             {
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.color, i, y) && protector.x == i && protector.y == y)
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && protector.X == i && protector.Y == y)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
                             {
                                 break;
                             }
@@ -6757,20 +6639,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6794,20 +6676,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6831,20 +6713,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6868,20 +6750,20 @@ namespace Chess
                                 break;
                             }
 
-                            if (king.x == i && king.y == j)
+                            if (king.X == i && king.Y == j)
                             {
                                 kingInPath = true;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && (protector.x != i || protector.y != j))
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && (protector.X != i || protector.Y != j))
                             {
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.color, i, j) && protector.x == i && protector.y == j)
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && protector.X == i && protector.Y == j)
                             {
                                 Protected = true;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
                             {
                                 break;
                             }
@@ -6907,12 +6789,10 @@ namespace Chess
         /// </summary>
         public void flipBoard()
         {
-            lastMove[2] = (7 - int.Parse(lastMove[2])).ToString();
-            lastMove[3] = (7 - int.Parse(lastMove[3])).ToString();
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in Pieces)
             {
-                piece.x = 7 - piece.x;
-                piece.y = 7 - piece.y;
+                piece.X = 7 - piece.X;
+                piece.Y = 7 - piece.Y;
             }
             foreach (DataGridViewRow row in board.Rows)
             {
@@ -6954,9 +6834,9 @@ namespace Chess
                     cell.Value = null;
                 }
             }
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in Pieces)
             {
-                board.Rows[piece.y].Cells[piece.x].Value = piece.icon;
+                board.Rows[piece.Y].Cells[piece.X].Value = piece.Icon;
             }
             foreach (DataGridViewColumn col in board.Columns)
             {

@@ -9,36 +9,39 @@ namespace Chess
 {
     public class Piece
     {
-        public String name { get; set; }
-        public Color color { get;}
-        public Image icon { get; set; }
-        public int x { get; set; }
-        public int y { get; set; }
+        public String Name { get; set; }
+        public Color Color { get;}
+        public Image Icon { get; set; }
+        public bool Locked { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
 
         public bool moved { get; set; }
 
         public Piece(String n, Color c, Image i, int X, int Y)
         {
-            name = n;
-            color = c;
-            icon = i;
-            x = X;
-            y = Y;
+            Name = n;
+            Color = c;
+            Icon = i;
+            Locked = false;
+            this.X = X;
+            this.Y = Y;
             moved = false;
         }
 
         public Piece()
         {
-            name = "";
-            icon = null;
-            x = -1;
-            y = -1;
+            Name = "";
+            Icon = null;
+            Locked = false;
+            X = -1;
+            Y = -1;
             moved = false;
         }
 
         public String ToString()
         {
-            return "Name: " + this.name + "\nColor: " + this.color.ToString() + "\nX: " + this.x + "\nY: " + this.y;
+            return "Name: " + this.Name + "\nColor: " + this.Color.ToString() + "\nX: " + this.X + "\nY: " + this.Y + "\nLocked: " + Locked.ToString();
         }
 
         //public bool equals(Piece peice)
