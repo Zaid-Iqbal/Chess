@@ -12,11 +12,28 @@ namespace Chess
         public String Name { get; set; }
         public Color Color { get;}
         public Image Icon { get; set; }
+
+        /// <summary>
+        /// Piece is in check and cannot move if true
+        /// </summary>
         public bool Locked { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
 
-        public bool moved { get; set; }
+        public bool Moved { get; set; }
+        public bool DoubleMoved { get; set; }
+
+        public Piece(Piece piece)
+        {
+            Name = piece.Name;
+            Color = piece.Color;
+            Icon = piece.Icon;
+            Locked = piece.Locked;
+            X = piece.X;
+            Y = piece.Y;
+            Moved = piece.Moved;
+            DoubleMoved = piece.DoubleMoved;
+        }
 
         public Piece(String n, Color c, Image i, int X, int Y)
         {
@@ -26,7 +43,8 @@ namespace Chess
             Locked = false;
             this.X = X;
             this.Y = Y;
-            moved = false;
+            Moved = false;
+            DoubleMoved = false;
         }
 
         public Piece()
@@ -36,7 +54,8 @@ namespace Chess
             Locked = false;
             X = -1;
             Y = -1;
-            moved = false;
+            Moved = false;
+            DoubleMoved = false;
         }
 
         public String ToString()

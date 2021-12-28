@@ -41,7 +41,7 @@ namespace Chess
         /// 2 = X
         /// 3 = Y
         /// </summary>
-        (int, int) lastMove = (-1,-1);
+        String lastMove;
 
         /// <summary>
         /// turns true if en Passant is selected
@@ -218,6 +218,8 @@ namespace Chess
                 return;
             }
 
+            board.Refresh();
+
             //move a piece if the board is highlighted
             if (board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Blue)
             {
@@ -237,7 +239,7 @@ namespace Chess
                     selected.Y = e.RowIndex;
 
                     board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = selected.Icon;     //Place the pieces icon at the new coordinates
-                    selected.moved = true;
+                    selected.Moved = true;
 
                     ogColor();
 
@@ -309,7 +311,7 @@ namespace Chess
                     selected.Y = e.RowIndex;
 
                     board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = selected.Icon;     //Place the pieces icon at the new coordinates
-                    selected.moved = true;
+                    selected.Moved = true;
 
                     ogColor();
 
@@ -381,19 +383,21 @@ namespace Chess
                     lastMove.Item2 = selected.Y;
                     //remove the picture of the killed piece
                     board.Rows[selected.Y].Cells[selected.X].Value = null;
+
                     //remove killed piece
-                    Pieces.Remove(selected);
+                    Pieces.Remove(Pieces.Find(k => k.X == e.ColumnIndex && k.Y == e.RowIndex));
 
                     //update the new position of the piece that did the kill
                     selected.X = e.ColumnIndex;
                     selected.Y = e.RowIndex;
 
+                    //Pieces.Find(k => k.Name == selected.Name && k.Color == selected.Color && k.X == selected.X && k.Y == selected.Y)
 
                     //move the picture of the piece that killed
                     board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = selected.Icon;
 
                     //update the value of the piece that just killed saying it has been selected
-                    selected.moved = true;
+                    selected.Moved = true;
 
                     //if the piece is not in currently in check
                     if ((selected.Color == Color.White && !check[0]) || (selected.Color == Color.Black && !check[1]))
@@ -584,7 +588,6 @@ namespace Chess
             //Promotion //TODO Add support for other piece options
             else if(board.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor == Color.Purple)
             {
-                //TODO use .Find to get selected piece rather than for loop
                 Piece piece = Pieces.Find(k => k.X == selected.X && k.Y == selected.Y);
                 if (preventCheck(piece).Name == "")
                 {
@@ -611,7 +614,7 @@ namespace Chess
                     piece.X = e.ColumnIndex;
                     piece.Y = e.RowIndex;
                     board.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = piece.Icon;
-                    piece.moved = true;
+                    piece.Moved = true;
                     ogColor();
 
                     //if there are threats to the king, that side is in check
@@ -728,34 +731,2335 @@ namespace Chess
         }
 
         /// <summary>
-        /// Checks if there is a stalemate
+        /// Checks to see if the color team can make a move. If not, there is a stalemate
         /// </summary>
         /// <param name="color"></param>
         /// <returns></returns>
         public bool checkStale(Color color)
         {
-            //highlight all the spaces of the color
-            foreach (Piece piece in Pieces)
+            DataTable table = GetMoves(color == Color.White ? Color.Black:Color.White);
+            Piece king = Pieces.Where(k => k.Name == "king" && k.Color == color).First();
+
+            if (table.Rows[king.X][king.Y - 1].ToString() == "E" ||
+                table.Rows[king.X + 1][king.Y - 1].ToString() == "E" ||
+                table.Rows[king.X + 1][king.Y].ToString() == "E" ||
+                table.Rows[king.X + 1][king.Y + 1].ToString() == "E" ||
+                table.Rows[king.X][king.Y + 1].ToString() == "E" ||
+                table.Rows[king.X - 1][king.Y + 1].ToString() == "E" ||
+                table.Rows[king.X - 1][king.Y].ToString() == "E" ||
+                table.Rows[king.X][king.Y - 1].ToString() == "E")
             {
-                if (piece.Color == color)
-                {
-                    highlightSpaces(piece, false);
-                }
+                return false;
+            }
+            return true;
+
+            //TODO replace this approach with a datatable that contains the possible moves
+            ////highlight all the spaces of the color
+            //foreach (Piece piece in Pieces)
+            //{
+            //    if (piece.Color == color)
+            //    {
+            //        highlightSpaces(piece, false);
+            //    }
+            //}
+            //foreach (DataGridViewRow row in board.Rows)
+            //{
+            //    foreach (DataGridViewCell cell in row.Cells)
+            //    {
+            //        if (cell.Style.BackColor == Color.Blue || cell.Style.BackColor == Color.Red || cell.Style.BackColor == Color.Green || cell.Style.BackColor == Color.Purple)
+            //        {
+            //            ogColor();
+            //            return false;
+            //        }
+            //    }
+            //}
+            ogColor();
+            return true;
+        }
+
+        /// <summary>
+        /// Get the Moves of the entire team
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public DataTable GetMoves(Color color)
+        {
+            DataTable table = new DataTable();
+
+            foreach (String letter in new[] { "a", "b", "c", "d", "e", "f", "g", "h" })
+            {
+                DataColumn dtColumn = new DataColumn();
+                dtColumn.DataType = typeof(String);
+                dtColumn.ColumnName = letter;
+                table.Columns.Add(dtColumn);
             }
 
-            foreach (DataGridViewRow row in board.Rows)
+            for (int i = 0; i < 8; i++)
             {
-                foreach (DataGridViewCell cell in row.Cells)
+                table.Rows.Add(table.NewRow());
+            }
+
+            foreach (Piece piece in Pieces.Where(k => k.Color == color))
+            {
+                int x = piece.X;
+                int y = piece.Y;
+                table.Rows[y][x] = color == Color.White ? "W" : "B";
+
+                //not in check
+                if ((!check[0] && piece.Color == Color.White) || (!check[1] && piece.Color == Color.Black))
                 {
-                    if (cell.Style.BackColor == Color.Blue || cell.Style.BackColor == Color.Red || cell.Style.BackColor == Color.Green || cell.Style.BackColor == Color.Purple)
+                    //piece is not preventing a check
+                    if (!piece.Locked)
                     {
-                        ogColor();
-                        return false;
+                        //bottom side pawn
+                        if (piece.Name == "pawn" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))// bottom side 
+                        {
+                            //left kill
+                            if (x - 1 != -1 && y - 1 != -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1) && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x - 1] = "K";
+                            }
+
+                            //right kill
+                            if (x + 1 != 8 && y - 1 != -1 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1) && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x + 1] = "K";
+                            }
+
+                            Piece LeftEnemy = Pieces.FirstOrDefault(k => k.X == x - 1 && k.Y == y);
+                            Piece RightEnemy = Pieces.FirstOrDefault(k => k.X == x + 1 && k.Y == y);
+
+                            //left en Passant
+                            if (x - 1 > -1 && y - 1 > -1 && LeftEnemy != null && board.Rows[y - 1].Cells[x - 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                            {
+                                table.Rows[y - 1][x - 1] = "M";
+                                table.Rows[y][x - 1] = "K";
+                            }
+
+                            //right en Passant
+                            if (x + 1 < 8 && y - 1 > -1 && LeftEnemy != null && board.Rows[y - 1].Cells[x + 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                            {
+                                table.Rows[y - 1][x + 1] = "M";
+                                table.Rows[y][x + 1] = "K";
+                            }
+
+                            //move 
+                            if (y - 1 > -1 && board.Rows[y - 1].Cells[x].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x] = "M";
+                            }
+
+                            //double move
+                            if (y == 6 && board.Rows[y - 2].Cells[x].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y - 2][x + 1] = "M";
+                            }
+
+                            //promotion
+                            if (y - 1 == 0 && board.Rows[y - 1].Cells[x].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x] = "P";
+                            }
+
+                            //promotion & kill right
+                            if (y - 1 == 0 && x + 1 < 8 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1) && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x + 1] = "P";
+                            }
+
+                            //promotion & kill right
+                            if (y - 1 == 0 && x - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1) && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x - 1] = "P";
+                            }
+                        }
+                        //top side pawn
+                        else if (piece.Name == "pawn" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
+                        {
+                            //left kill
+                            if (x + 1 < 8 && y + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1) && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x + 1] = "K";
+
+                            }
+
+                            //right kill
+                            if (x - 1 > -1 && y + 1 < 8 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1) && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x - 1] = "K";
+                            }
+
+                            //single move
+                            if (y + 1 < 8 && board.Rows[y + 1].Cells[x].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x] = "M";
+                            }
+
+                            //double move
+                            if (y == 1 && y + 2 < 8 && board.Rows[y + 2].Cells[x].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y + 2][x] = "M";
+                            }
+
+                            Piece LeftEnemy = Pieces.FirstOrDefault(k => k.X == x + 1 && k.Y == y);
+                            Piece RightEnemy = Pieces.FirstOrDefault(k => k.X == x - 1 && k.Y == y);
+
+                            //left en Passant
+                            if (x + 1 < 8 && y - 1 > -1 && LeftEnemy != null && board.Rows[y - 1].Cells[x + 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                            {
+                                table.Rows[y - 1][x + 1] = "M";
+                                table.Rows[y][x + 1] = "K";
+                            }
+
+                            //right en Passant
+                            if (x - 1 > -1 && y - 1 > -1 && LeftEnemy != null && board.Rows[y - 1].Cells[x - 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                            {
+                                table.Rows[y - 1][x - 1] = "M";
+                                table.Rows[y][x - 1] = "K";
+                            }
+
+                            //promotions
+                            if (y + 1 < 8 && board.Rows[y + 1].Cells[x].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x] = "P";
+                            }
+                            if (y + 1 < 8 && x - 1 > -1 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1) && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x - 1] = "P";
+                            }
+                            if (y + 1 < 8 && x + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1) && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x + 1] = "P";
+                            }
+                        }
+                        else if (piece.Name == "rook")
+                        {
+                            //above (i represents y/row)
+                            for (int i = y - 1; i > -1; i--)
+                            {
+                                if (board.Rows[i].Cells[x].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "M";
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //below (i represents y/row)
+                            for (int i = y + 1; i < 8; i++)
+                            {
+                                if (board.Rows[i].Cells[x].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "M";
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //left (i represents x/column)
+                            for (int i = x - 1; i > -1; i--)
+                            {
+                                if (board.Rows[y].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "M";
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //right (i represents x/column)
+                            for (int i = x + 1; i < 8; i++)
+                            {
+                                if (board.Rows[y].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "M";
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        else if (piece.Name == "horse")
+                        {
+                            //up left
+                            if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y - 2][x - 1] = "M";
+                            }
+                            else if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 2) && !piece.Locked)
+                            {
+                                table.Rows[y - 2][x - 1] = "K";
+                            }
+
+                            //up right
+                            if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y - 2][x + 1] = "M";
+                            }
+                            else if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 2) && !piece.Locked)
+                            {
+                                table.Rows[y - 2][x + 1] = "K";
+                            }
+
+                            //right up
+                            if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x + 2].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x + 2] = "M";
+                            }
+                            else if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x + 2].Value != null && containsEnemy(piece.Color, x + 2, y - 1) && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x + 2] = "K";
+                            }
+
+                            //right down
+                            if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x + 2] = "M";
+                            }
+                            else if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value != null && containsEnemy(piece.Color, x + 2, y + 1) && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x + 2] = "K";
+                            }
+
+                            //down left
+                            if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y + 2][x - 1] = "M";
+                            }
+                            else if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 2) && !piece.Locked)
+                            {
+                                table.Rows[y + 2][x - 1] = "K";
+                            }
+
+                            //down right
+                            if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x + 1].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y + 2][x + 1] = "M";
+                            }
+                            else if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 2) && !piece.Locked)
+                            {
+                                table.Rows[y + 2][x + 1] = "K";
+                            }
+
+                            //left up
+                            if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x - 2] = "M";
+                            }
+                            else if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value != null && containsEnemy(piece.Color, x - 2, y + 1) && !piece.Locked)
+                            {
+                                table.Rows[y + 1][x - 2] = "K";
+                            }
+
+                            //left down
+                            if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 2].Value == null && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x - 2] = "M";
+                            }
+                            else if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 2].Value != null && containsEnemy(piece.Color, x - 2, y - 1) && !piece.Locked)
+                            {
+                                table.Rows[y - 1][x - 2] = "K";
+                            }
+                        }
+                        else if (piece.Name == "bishop")
+                        {
+                            int i;
+                            int j;
+
+                            //up right
+                            for (i = x + 1, j = y - 1; i < 8; i++, j--)
+                            {
+                                if (j > 7 || j < 0)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //up left
+                            for (i = x - 1, j = y - 1; i > -1; i--, j--)
+                            {
+                                if (j > 7 || j < 0)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //down right
+                            for (i = x + 1, j = y + 1; i < 8; i++, j++)
+                            {
+                                if (j > 7 || j < 0)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //down left
+                            for (i = x - 1, j = y + 1; i > -1; i--, j++)
+                            {
+                                if (j > 7 || j < 0)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        else if (piece.Name == "queen")
+                        {
+                            int i;
+                            int j;
+
+                            //up right
+                            for (i = x + 1, j = y - 1; i < 8; i++, j--)
+                            {
+                                if (j < 0)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //up left
+                            for (i = x - 1, j = y - 1; i > -1; i--, j--)
+                            {
+                                if (j < 0)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //down right
+                            for (i = x + 1, j = y + 1; i < 8; i++, j++)
+                            {
+                                if (j > 7)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //down left
+                            for (i = x - 1, j = y + 1; i > -1; i--, j++)
+                            {
+                                if (j > 7)
+                                {
+                                    break;
+                                }
+
+                                if (board.Rows[j].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "M";
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j) && !piece.Locked)
+                                {
+                                    table.Rows[j][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[j].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //above (i represents y/row)
+                            for (i = y - 1; i > -1; i--)
+                            {
+                                if (board.Rows[i].Cells[x].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "M";
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //below (i represents y/row)
+                            for (i = y + 1; i < 8; i++)
+                            {
+                                if (board.Rows[i].Cells[x].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "M";
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i) && !piece.Locked)
+                                {
+                                    table.Rows[i][x] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[i].Cells[x].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //left (i represents x/column)
+                            for (i = x - 1; i > -1; i--)
+                            {
+                                if (board.Rows[y].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "M";
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+
+                            //right (i represents x/column)
+                            for (i = x + 1; i < 8; i++)
+                            {
+                                if (board.Rows[y].Cells[i].Value == null && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "M";
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y) && !piece.Locked)
+                                {
+                                    table.Rows[y][i] = "K";
+                                    break;
+                                }
+                                else if (board.Rows[y].Cells[i].Value != null && !piece.Locked)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        else if (piece.Name == "king")
+                        {
+                            List<int[]> future = getCheckTiles(piece.Color == Color.White ? Color.Black : Color.White)[1];
+
+                            //right
+                            if (x + 1 < 8)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x + 1 == tile[0] && y == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y].Cells[x + 1].Value == null)
+                                    {
+                                        table.Rows[y][x + 1] = "M";
+                                    }
+                                    else if (board.Rows[y].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y))
+                                    {
+                                        table.Rows[y][x + 1] = "K";
+                                    }
+                                }
+
+                            }
+
+                            //left
+                            if (x - 1 > -1)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x - 1 == tile[0] && y == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y].Cells[x - 1].Value == null)
+                                    {
+                                        table.Rows[y][x - 1] = "M";
+                                    }
+                                    else if (board.Rows[y].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y))
+                                    {
+                                        table.Rows[y][x - 1] = "K";
+                                    }
+                                }
+
+                            }
+
+                            //down
+                            if (y + 1 < 8)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x == tile[0] && y + 1 == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y + 1].Cells[x].Value == null)
+                                    {
+                                        table.Rows[y + 1][x] = "M";
+                                    }
+                                    else if (board.Rows[y + 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y + 1))
+                                    {
+                                        table.Rows[y + 1][x] = "K";
+                                    }
+                                }
+
+                            }
+
+                            //up
+                            if (y - 1 > -1)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x == tile[0] && y - 1 == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y - 1].Cells[x].Value == null)
+                                    {
+                                        table.Rows[y - 1][x] = "M";
+                                    }
+                                    else if (board.Rows[y - 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y - 1))
+                                    {
+                                        table.Rows[y - 1][x] = "M";
+                                    }
+                                }
+
+                            }
+
+                            //top right
+                            if (x + 1 < 8 && y - 1 > -1)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x + 1 == tile[0] && y - 1 == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y - 1].Cells[x + 1].Value == null)
+                                    {
+                                        table.Rows[y - 1][x + 1] = "M";
+                                    }
+                                    else if (board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1))
+                                    {
+                                        table.Rows[y - 1][x + 1] = "K";
+                                    }
+                                }
+
+                            }
+
+                            //top left
+                            if (x - 1 > -1 && y - 1 > -1)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x - 1 == tile[0] && y - 1 == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y - 1].Cells[x - 1].Value == null)
+                                    {
+                                        table.Rows[y - 1][x - 1] = "M";
+                                    }
+                                    else if (board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1))
+                                    {
+                                        table.Rows[y - 1][x - 1] = "K";
+                                    }
+                                }
+
+                            }
+
+                            //bottom right
+                            if (x + 1 < 8 && y + 1 < 8)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x + 1 == tile[0] && y + 1 == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y + 1].Cells[x + 1].Value == null)
+                                    {
+                                        table.Rows[y + 1][x + 1] = "M";
+                                    }
+                                    else if (board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1))
+                                    {
+                                        table.Rows[y + 1][x + 1] = "K";
+                                    }
+                                }
+
+                            }
+
+                            //bottom left
+                            if (x - 1 > -1 && y + 1 < 8)
+                            {
+                                bool covered = false;
+                                //make sure the king cant go on a space covered by the enemy
+                                foreach (int[] tile in future)
+                                {
+                                    if (x - 1 == tile[0] && y + 1 == tile[1])
+                                    {
+                                        covered = true;
+                                    }
+                                }
+                                if (!covered)
+                                {
+                                    if (board.Rows[y + 1].Cells[x - 1].Value == null)
+                                    {
+                                        table.Rows[y + 1][x - 1] = "M";
+                                    }
+                                    else if (board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1))
+                                    {
+                                        table.Rows[y + 1][x - 1] = "K";
+                                    }
+                                }
+                            }
+                            //CASTLE
+                            //check if white or black
+                            if (piece.Color == Color.White)
+                            {
+                                //if king has not moved and the spaces between him and the rook are check free
+                                if (!piece.Moved)
+                                {
+                                    //KINGSIDE CASTLE
+                                    bool castle = true;
+
+                                    //find kingside rook
+                                    Piece kingRook = new Piece();
+                                    foreach (Piece findRook in Pieces)
+                                    {
+                                        if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 7)
+                                        {
+                                            kingRook = findRook;
+                                        }
+                                    }
+
+                                    //check if rook was found successfully and the spots between king and rook are empty
+                                    if (kingRook.Name == "rook" && board.Rows[y].Cells[piece.X + 1].Value == null && board.Rows[y].Cells[piece.X + 2].Value == null)
+                                    {
+                                        //check each future move of the enemy to see if spaces in between king and rook are not in check
+                                        foreach (int[] tile in future)
+                                        {
+                                            //if the 2 spots are checkable, castle is illegal
+                                            if ((piece.X + 1 == tile[0] && piece.Y == tile[1]) || (piece.X + 2 == tile[0] && piece.Y == tile[1]))
+                                            {
+                                                castle = false;
+                                            }
+                                        }
+
+                                        if (castle)
+                                        {
+                                            table.Rows[kingRook.Y][kingRook.X] = "C";
+                                        }
+                                    }
+
+
+                                    //QUEENSIDE CASTLE
+                                    castle = true;
+
+                                    //find kingside rook
+                                    Piece queenRook = new Piece();
+                                    foreach (Piece findRook in Pieces)
+                                    {
+                                        if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 0)
+                                        {
+                                            queenRook = findRook;
+                                        }
+                                    }
+
+                                    //check if rook was found successfully and the spots between king and rook are empty
+                                    if (queenRook.Name == "rook" && board.Rows[y].Cells[piece.X - 1].Value == null && board.Rows[y].Cells[piece.X - 2].Value == null && board.Rows[y].Cells[piece.X - 3].Value == null)
+                                    {
+                                        //check each future move of the enemy to see if spaces in between king and rook are not in check
+                                        foreach (int[] tile in future)
+                                        {
+                                            //if the 2 spots are checkable, castle is illegal
+                                            if ((piece.X - 1 == tile[0] && piece.Y == tile[1]) || (piece.X - 2 == tile[0] && piece.Y == tile[1]))
+                                            {
+                                                castle = false;
+                                            }
+                                        }
+
+                                        if (castle)
+                                        {
+                                            table.Rows[queenRook.Y][queenRook.X] = "C";
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //if king has not moved and the spaces between him and the rook are check free
+                                if (!piece.Moved)
+                                {
+                                    //KINGSIDE CASTLE
+                                    bool castle = true;
+
+                                    //find kingside rook
+                                    Piece kingRook = new Piece();
+                                    foreach (Piece findRook in Pieces)
+                                    {
+                                        if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 0)
+                                        {
+                                            kingRook = findRook;
+                                        }
+                                    }
+
+                                    //check if rook was found successfully and the spots between king and rook are empty
+                                    if (kingRook.Name == "rook" && board.Rows[y].Cells[piece.X - 1].Value == null && board.Rows[y].Cells[piece.X - 2].Value == null)
+                                    {
+                                        //check each future move of the enemy to see if spaces in between king and rook are not in check
+                                        foreach (int[] tile in future)
+                                        {
+                                            //if the 2 spots are checkable, castle is illegal
+                                            if ((piece.X - 1 == tile[0] && piece.Y == tile[1]) || (piece.X - 2 == tile[0] && piece.Y == tile[1]))
+                                            {
+                                                castle = false;
+                                            }
+                                        }
+
+                                        if (castle)
+                                        {
+                                            table.Rows[kingRook.Y][kingRook.X] = "C";
+                                        }
+                                    }
+
+
+                                    //QUEENSIDE CASTLE
+                                    castle = true;
+
+                                    //find kingside rook
+                                    Piece queenRook = new Piece();
+                                    foreach (Piece findRook in Pieces)
+                                    {
+                                        if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 7)
+                                        {
+                                            queenRook = findRook;
+                                        }
+                                    }
+
+                                    //check if rook was found successfully and the spots between king and rook are empty
+                                    if (queenRook.Name == "rook" && board.Rows[y].Cells[piece.X + 1].Value == null && board.Rows[y].Cells[piece.X + 2].Value == null && board.Rows[y].Cells[piece.X + 3].Value == null)
+                                    {
+                                        //check each future move of the enemy to see if spaces in between king and rook are not in check
+                                        foreach (int[] tile in future)
+                                        {
+                                            //if the 2 spots are checkable, castle is illegal
+                                            if ((piece.X + 1 == tile[0] && piece.Y == tile[1]) || (piece.X + 2 == tile[0] && piece.Y == tile[1]))
+                                            {
+                                                castle = false;
+                                            }
+                                        }
+
+                                        if (castle)
+                                        {
+                                            table.Rows[queenRook.Y][queenRook.X] = "C";
+                                        }
+                                    }
+                                }
+                            }
+
+
+                        }
+                    }
+                    else
+                    {
+                        List<int[]>[] getCheck = getCheckTiles(piece.Color == Color.White ? Color.Black : Color.White);
+                        List<int[]> threats = getCheck[0];
+                        List<int[]> future = getCheck[1];
+                    }
+                    
+                }
+                //in check
+                else if((check[0] && piece.Color == Color.White) || (check[1] && piece.Color == Color.Black))
+                {
+                    List<int[]>[] getCheck = getCheckTiles(piece.Color == Color.White ? Color.Black : Color.White);
+                    List<int[]> threats = getCheck[0];
+                    List<int[]> future = getCheck[1];
+                    int threatPieces = getCheck[2][0][0]; //TODO implement this
+
+                    if (piece.Name == "king")
+                    {
+                        //up
+                        if (y - 1 > -1 && board.Rows[y - 1].Cells[x].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x && tile[1] == y - 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x && tile[1] == y - 1)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y - 1][x] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (y - 1 > -1 && board.Rows[y - 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y - 1))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x && tile[1] == y - 1)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x && tile[1] == y - 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y - 1][x] = "K";
+                            }
+                        }
+
+                        //down
+                        if (y + 1 < 8 && board.Rows[y + 1].Cells[x].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x && tile[1] == y + 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x && tile[1] == y + 1)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y + 1][x] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (y + 1 < 8 && board.Rows[y + 1].Cells[x].Value != null && containsEnemy(piece.Color, x, y + 1))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x && tile[1] == y + 1)
+                                {
+                                    open = false;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x && tile[1] == y + 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y + 1][x] = "K";
+                            }
+                        }
+
+                        //left
+                        if (x - 1 > -1 && board.Rows[y].Cells[x - 1].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y][x - 1] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (x - 1 > -1 && board.Rows[y].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x - 1 && tile[1] == y)
+                                {
+                                    open = false;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y][x - 1] = "K";
+                            }
+                        }
+
+                        //right
+                        if (x + 1 < 8 && board.Rows[y].Cells[x + 1].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y][x + 1] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (x + 1 < 8 && board.Rows[y].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x + 1 && tile[1] == y)
+                                {
+                                    open = false;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y][x + 1] = "K";
+                            }
+                        }
+
+                        //up left
+                        if (x - 1 > -1 && y - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y - 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y - 1)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y - 1][x - 1] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (x - 1 > -1 && y - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 1))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x - 1 && tile[1] == y - 1)
+                                {
+                                    open = false;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y - 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y - 1][x - 1] = "K";
+                            }
+                        }
+
+                        //up right
+                        if (x + 1 < 8 && y - 1 > -1 && board.Rows[y - 1].Cells[x + 1].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y - 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y - 1)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y - 1][x + 1] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (x + 1 < 8 && y - 1 > -1 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 1))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x + 1 && tile[1] == y - 1)
+                                {
+                                    open = false;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y - 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y - 1][x + 1] = "K";
+                            }
+                        }
+
+                        //down left
+                        if (x - 1 > -1 && y + 1 < 8 && board.Rows[y + 1].Cells[x - 1].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y + 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y + 1)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y + 1][x - 1] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (x - 1 > -1 && y + 1 < 8 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 1))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x - 1 && tile[1] == y + 1)
+                                {
+                                    open = false;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x - 1 && tile[1] == y + 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y + 1][x - 1] = "K";
+                            }
+                        }
+
+                        //down right
+                        if (x + 1 < 8 && y + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value == null)
+                        {
+                            bool open = true;
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y + 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            foreach (int[] tile in future)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y + 1)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y + 1][x + 1] = "M";
+                            }
+                        }
+                        //if an enemy is on that tile
+                        else if (x + 1 < 8 && y + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y + 1))
+                        {
+                            bool open = true;
+                            foreach (int[] tile in future)
+                            {
+                                //if that tile is also covered by another enemy
+                                if (tile[0] == x + 1 && tile[1] == y + 1)
+                                {
+                                    open = false;
+                                }
+                            }
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is covered by the enemy, the king cant move there and the opening is false
+                                if (tile[0] == x + 1 && tile[1] == y + 1 && tile[2] == 0)
+                                {
+                                    open = false;
+                                    break;
+                                }
+                            }
+                            if (open)
+                            {
+                                table.Rows[y + 1][x + 1] = "K";
+                            }
+                        }
+                    }
+                    //bottom side pawn
+                    else if (piece.Name == "pawn" && ((piece.Color == Color.White && turn) || (piece.Color == Color.Black && !turn)))
+                    {
+                        //up
+                        if (y - 1 > -1 && board.Rows[y - 1].Cells[x].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x && tile[1] == y - 1 && tile[2] == 0)
+                                {
+                                    table.Rows[y - 1][x] = "M";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //up 2
+                        if (y == 6 && board.Rows[y - 2].Cells[x].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x && tile[1] == y - 2 && tile[2] == 0)
+                                {
+                                    table.Rows[y - 2][x] = "M";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //up left
+                        if (y - 1 > -1 && x - 1 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(Color.White, x - 1, y - 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x - 1 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x - 1] = "K";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //up right
+                        if (y - 1 > -1 && x + 1 < 8 && board.Rows[y - 1].Cells[x + 1].Value != null && containsEnemy(Color.White, x + 1, y - 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x + 1 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x + 1] = "K";
+                                    break;
+                                }
+                            }
+                        }
+
+                        Piece LeftEnemy = Pieces.FirstOrDefault(k => k.X == x - 1 && k.Y == y);
+                        Piece RightEnemy = Pieces.FirstOrDefault(k => k.X == x + 1 && k.Y == y);
+
+                        //left en Passant
+                        if (x - 1 > -1 && y - 1 > -1 && LeftEnemy != null && board.Rows[y - 1].Cells[x - 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x - 1 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x - 1] = "M";
+                                    table.Rows[y][x - 1] = "K";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //right en Passant
+                        if (x + 1 < 8 && y - 1 > -1 && LeftEnemy != null && board.Rows[y - 1].Cells[x + 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x - 1 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x + 1] = "M";
+                                    table.Rows[y][x + 1] = "K";
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                    //top side pawn
+                    else if (piece.Name == "pawn" && ((piece.Color == Color.White && !turn) || (piece.Color == Color.Black && turn)))
+                    {
+                        //move
+                        if (y + 1 < 8 && board.Rows[y + 1].Cells[x].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x && tile[1] == y + 1 && tile[2] == 0)
+                                {
+                                    table.Rows[y + 1][x] = "M";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //double move
+                        if (y == 1 && board.Rows[y + 2].Cells[x].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x && tile[1] == y + 2 && tile[2] == 0)
+                                {
+                                    table.Rows[y + 2][x] = "M";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //left kill
+                        if (y + 1 < 8 && x - 1 > -1 && board.Rows[y + 1].Cells[x - 1].Value != null && containsEnemy(Color.White, x - 1, y + 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x - 1 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x - 1] = "K";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //right kill
+                        if (y + 1 < 8 && x + 1 < 8 && board.Rows[y + 1].Cells[x + 1].Value != null && containsEnemy(Color.White, x + 1, y + 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x + 1 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x + 1] = "K";
+                                    break;
+                                }
+                            }
+                        }
+
+                        Piece LeftEnemy = Pieces.FirstOrDefault(k => k.X == x - 1 && k.Y == y);
+                        Piece RightEnemy = Pieces.FirstOrDefault(k => k.X == x + 1 && k.Y == y);
+
+                        //right en Passant
+                        if (x - 1 > -1 && y + 1 < 8 && LeftEnemy != null && board.Rows[y + 1].Cells[x - 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x - 1 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x - 1] = "M";
+                                    table.Rows[y][x - 1] = "K";
+                                    break;
+                                }
+                            }
+                        }
+
+                        //left en Passant
+                        if (x + 1 < 8 && y + 1 > -1 && LeftEnemy != null && board.Rows[y + 1].Cells[x + 1].Value == null && LeftEnemy.Color != color && !piece.Locked && piece.DoubleMoved)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                //if the tile is threatening the king, the piece can move to block that threat
+                                if (tile[0] == x - 1 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x + 1] = "M";
+                                    table.Rows[y][x + 1] = "K";
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                    else if (piece.Name == "rook")
+                    {
+                        //above (i represents y/row)
+                        for (int i = y - 1; i > -1; i--)
+                        {
+                            if (board.Rows[i].Cells[x].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null)
+                            {
+                                break;
+                            }
+                        }
+
+                        //below (i represents y/row)
+                        for (int i = y + 1; i < 8; i++)
+                        {
+                            if (board.Rows[i].Cells[x].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null)
+                            {
+                                break;
+                            }
+                        }
+
+                        //left (i represents x/column)
+                        for (int i = x - 1; i > -1; i--)
+                        {
+                            if (board.Rows[y].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null)
+                            {
+                                break;
+                            }
+                        }
+
+                        //right (i represents x/column)
+                        for (int i = x + 1; i < 8; i++)
+                        {
+                            if (board.Rows[y].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null)
+                            {
+                                break;
+                            }
+                        }
+
+                    }
+                    else if (piece.Name == "horse")
+                    {
+                        //up left
+                        if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 1 && tile[1] == y - 2)
+                                {
+                                    table.Rows[y - 2][x - 1] = "M";
+                                }
+                            }
+                        }
+                        else if (y - 2 > -1 && x - 1 > -1 && board.Rows[y - 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y - 2))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 1 && tile[1] == y - 2)
+                                {
+                                    table.Rows[y - 2][x - 1] = "K";
+                                }
+                            }
+                        }
+
+                        //up right
+                        if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 1 && tile[1] == y - 2)
+                                {
+                                    table.Rows[y - 2][x + 1] = "M";
+                                }
+                            }
+                        }
+                        else if (y - 2 > -1 && x + 1 < 8 && board.Rows[y - 2].Cells[x + 1].Value != null && containsEnemy(piece.Color, x + 1, y - 2))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 1 && tile[1] == y - 2)
+                                {
+                                    table.Rows[y - 2][x + 1] = "K";
+                                }
+                            }
+                        }
+
+                        //right up
+                        if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x + 2].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 2 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x + 2] = "M";
+                                }
+                            }
+                        }
+                        else if (y - 1 > -1 && x + 2 < 8 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x + 2, y - 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 2 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x + 2] = "K";
+                                }
+                            }
+                        }
+
+                        //right down
+                        if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 2 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x + 2] = "M";
+                                }
+                            }
+                        }
+                        else if (y + 1 < 8 && x + 2 < 8 && board.Rows[y + 1].Cells[x + 2].Value != null && containsEnemy(piece.Color, x + 2, y + 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 2 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x + 2] = "K";
+                                }
+                            }
+                        }
+
+                        //down right
+                        if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x + 1].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 1 && tile[1] == y + 2)
+                                {
+                                    table.Rows[y + 2][x + 1] = "M";
+                                }
+                            }
+                        }
+                        else if (y + 2 < 8 && x + 1 < 8 && board.Rows[y + 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x + 1, y + 2))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x + 1 && tile[1] == y + 2)
+                                {
+                                    table.Rows[y + 2][x + 1] = "K";
+                                }
+                            }
+                        }
+
+                        //down left
+                        if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 1 && tile[1] == y + 2)
+                                {
+                                    table.Rows[y + 2][x - 1] = "M";
+                                }
+                            }
+                        }
+                        else if (y + 2 < 8 && x - 1 > -1 && board.Rows[y + 2].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 1, y + 2))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 1 && tile[1] == y + 2)
+                                {
+                                    table.Rows[y + 2][x - 1] = "K";
+                                }
+                            }
+                        }
+
+                        //left down
+                        if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 2 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x - 2] = "M";
+                                }
+                            }
+                        }
+                        else if (y + 1 < 8 && x - 2 > -1 && board.Rows[y + 1].Cells[x - 2].Value != null && containsEnemy(piece.Color, x - 2, y + 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 2 && tile[1] == y + 1)
+                                {
+                                    table.Rows[y + 1][x - 2] = "K";
+                                }
+                            }
+                        }
+
+                        //left up
+                        if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 2].Value == null)
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 2 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x - 2] = "M";
+                                }
+                            }
+                        }
+                        else if (y - 1 > -1 && x - 2 > -1 && board.Rows[y - 1].Cells[x - 1].Value != null && containsEnemy(piece.Color, x - 2, y - 1))
+                        {
+                            foreach (int[] tile in threats)
+                            {
+                                if (tile[0] == x - 2 && tile[1] == y - 1)
+                                {
+                                    table.Rows[y - 1][x - 2] = "K";
+                                }
+                            }
+                        }
+                    }
+                    else if (piece.Name == "bishop")
+                    {
+                        int i;
+                        int j;
+                        //up right
+                        for (i = x + 1, j = y - 1; i < 8; i++, j--)
+                        {
+                            if (j < 0)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null)
+                            {
+                                break;
+                            }
+                        }
+
+                        //down right
+                        for (i = x + 1, j = y + 1; i < 8; i++, j++)
+                        {
+                            if (j > 7)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null)
+                            {
+                                break;
+                            }
+                        }
+
+                        //down left
+                        for (i = x - 1, j = y + 1; i > -1; i--, j++)
+                        {
+                            if (j > 7)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null)
+                            {
+                                break;
+                            }
+                        }
+
+                        //up left
+                        for (i = x - 1, j = y - 1; i > -1; i--, j--)
+                        {
+                            if (j < 0)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == j)
+                                    {
+                                        table.Rows[j][i] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    else if (piece.Name == "queen")
+                    {
+                        int i;
+                        int j;
+                        //up right
+                        for (i = x + 1, j = y - 1; i < 8; i++, j--)
+                        {
+                            if (j < 0)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            {
+                                break;
+                            }
+                        }
+
+                        //down right
+                        for (i = x + 1, j = y + 1; i < 8; i++, j++)
+                        {
+                            if (j > 7)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            {
+                                break;
+                            }
+                        }
+
+                        //down left
+                        for (i = x - 1, j = y + 1; i > -1; i--, j++)
+                        {
+                            if (j > 7)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            {
+                                break;
+                            }
+                        }
+
+                        //up left
+                        for (i = x - 1, j = y - 1; i > -1; i--, j--)
+                        {
+                            if (j < 0)
+                            {
+                                break;
+                            }
+
+                            if (board.Rows[j].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                    }
+                                }
+                                break;
+                            }
+                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            {
+                                break;
+                            }
+                        }
+
+                        //above (i represents y/row)
+                        for (i = y - 1; i > -1; i--)
+                        {
+                            if (board.Rows[i].Cells[x].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
+                            {
+                                break;
+                            }
+                        }
+
+                        //below (i represents y/row)
+                        for (i = y + 1; i < 8; i++)
+                        {
+                            if (board.Rows[i].Cells[x].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == x && tile[1] == i)
+                                    {
+                                        table.Rows[i][x] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
+                            {
+                                break;
+                            }
+                        }
+
+                        //left (i represents x/column)
+                        for (i = x - 1; i > -1; i--)
+                        {
+                            if (board.Rows[y].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
+                            {
+                                break;
+                            }
+                        }
+
+                        //right (i represents x/column)
+                        for (i = x + 1; i > 8; i++)
+                        {
+                            if (board.Rows[y].Cells[i].Value == null)
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "M";
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
+                            {
+                                foreach (int[] tile in threats)
+                                {
+                                    if (tile[0] == i && tile[1] == y)
+                                    {
+                                        table.Rows[y][i] = "K";
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
+                            {
+                                break;
+                            }
+                        }
                     }
                 }
             }
-            ogColor();
-            return true;
         }
 
         /// <summary>
@@ -851,9 +3155,10 @@ namespace Chess
         }
 
         /// <summary>
-        /// Returns a 2 array lists. 
-        /// The first list shows the spaces the team in check must cover to protect the king and get out of check. 
-        /// The second list shows the spaces the king cannot move to since that would result in the kings death during the next turn
+        /// Returns a 3 array lists. 
+        /// The First list shows the spaces the team in check must cover to protect the king and get out of check. 
+        /// The Second list shows the spaces the king cannot move to since that would result in the kings death during the next turn
+        /// The Third array list has one element (int) showing how many pieces are holding the king in check at this moment
         /// int[0] = x
         /// int[1] = y
         /// int[2] = (true = has enemy, false = empty)
@@ -862,16 +3167,22 @@ namespace Chess
         /// <returns></returns>
         public List<int[]>[] getCheckTiles(Color attack)
         {
+            //king that is being attacked (other color's king)
             Piece king = Pieces.Find(k => k.Name == "king" && k.Color != attack);
 
             // int[0] == x cord
             // int[1] == y cord
             // int[2] == (1 == piece) (0 == space)
-            //tiles that are curently threatening the king
+            //only tiles that are curently threatening the king
             List<int[]> threats = new List<int[]>();
 
-            //tiles that the enemy can move and kill if you go there next turn (FOR THE KING)
+            //tiles that the king cannot move to because it would still put him in danger 
+            //(pawn side kill is an example of a future tile but not a tile that is currently threatneing the king)
+            //basically all the tiles the attacking team can move to
             List<int[]> future = new List<int[]>();
+
+            //# of pieces holding the king in check rn
+            int count = 0;
 
             foreach (Piece piece in Pieces)
             {
@@ -893,6 +3204,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y - 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -905,6 +3217,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y - 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -920,6 +3233,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y + 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -932,6 +3246,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y + 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -951,6 +3266,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y + 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -963,6 +3279,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y + 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -978,6 +3295,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x - 1, y - 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -990,6 +3308,7 @@ namespace Chess
                                 {
                                     threats.Add(new int[] { x, y, 1 });
                                     future.Add(new int[] { x + 1, y - 1, 0 });
+                                    count++;
                                 }
                                 else
                                 {
@@ -1010,28 +3329,26 @@ namespace Chess
                         //above
                         for (int i = y - 1; i > -1; i--)
                         {
+                            //empty
                             if (board.Rows[i].Cells[x].Value == null)
                             {
                                 possible.Add(new int[] { x, i, 0 });
                                 future.Add(new int[] { x, i, 0 });
                             }
+                            //piece is aiming at king
                             else if (king.X == x && king.Y == i)
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
+                            //The piece is being blocked some other piece (doesn't matter which side. If a piece is in the way, the line stops here)
+                            else if (board.Rows[i].Cells[x].Value != null)
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
-                            {
-                                future.Add(new int[] { x, i, 0 });
-                                break;
-                            }
-
                         }
 
                         //if the king wasn't killable through the spaces above, it clears the possible tiles and checks the next direction
@@ -1052,14 +3369,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
-                            {
-                                future.Add(new int[] { x, i, 0 });
-                                break;
-                            }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null)
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
@@ -1084,14 +3397,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
-                            {
-                                future.Add(new int[] { i, y, 0 });
-                                break;
-                            }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1116,14 +3425,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
-                            {
-                                future.Add(new int[] { i, y, 0 });
-                                break;
-                            }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1140,6 +3445,7 @@ namespace Chess
                             if (king.X == x - 1 && king.Y == y - 2)
                             {
                                 threats.Add(new int[] {x, y, 1});
+                                count++;
                             }
                             else
                             {
@@ -1153,6 +3459,7 @@ namespace Chess
                             if (king.X == x + 1 && king.Y == y - 2)
                             {
                                 threats.Add(new int[] { x, y, 1 });
+                                count++;
                             }
                             else
                             {
@@ -1166,6 +3473,7 @@ namespace Chess
                             if (king.X == x + 2 && king.Y == y - 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
+                                count++;
                             }
                             else
                             {
@@ -1179,6 +3487,7 @@ namespace Chess
                             if (king.X == x + 2 && king.Y == y + 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
+                                count++;
                             }
                             else
                             {
@@ -1192,6 +3501,7 @@ namespace Chess
                             if (king.X == x - 1 && king.Y == y + 2)
                             {
                                 threats.Add(new int[] { x, y, 1 });
+                                count++;
                             }
                             else
                             {
@@ -1205,6 +3515,7 @@ namespace Chess
                             if (king.X == x + 1 && king.Y == y + 2)
                             {
                                 threats.Add(new int[] { x, y, 1 });
+                                count++;
                             }
                             else
                             {
@@ -1218,6 +3529,7 @@ namespace Chess
                             if (king.X == x - 2 && king.Y == y + 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
+                                count++;
                             }
                             else
                             {
@@ -1231,6 +3543,7 @@ namespace Chess
                             if (king.X == x - 2 && king.Y == y - 1)
                             {
                                 threats.Add(new int[] { x, y, 1 });
+                                count++;
                             }
                             else
                             {
@@ -1269,14 +3582,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] {i, j, 0});
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1306,14 +3615,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1343,14 +3648,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1380,14 +3681,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1412,7 +3709,7 @@ namespace Chess
                         //up left
                         for (i = x - 1, j = y - 1; i > -1; i--, j--)
                         {
-                            if (j > 7 || j < 0)
+                            if (j < 0)
                             {
                                 break;
                             }
@@ -1426,14 +3723,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1449,7 +3742,7 @@ namespace Chess
                         //up right
                         for (i = x + 1, j = y - 1; i < 8; i++, j--)
                         {
-                            if (j > 7 || j < 0)
+                            if (j < 0)
                             {
                                 break;
                             }
@@ -1463,14 +3756,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1500,14 +3789,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, j, 0 });
                                 break;
@@ -1523,7 +3808,7 @@ namespace Chess
                         //down left
                         for (i = x - 1, j = y + 1; i > -1; i--, j++)
                         {
-                            if (j > 7 || i < 0)
+                            if (j > 7)
                             {
                                 break;
                             }
@@ -1537,16 +3822,12 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, j, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[j].Cells[i].Value != null && containsEnemy(piece.Color, i, j))
+                            else if (board.Rows[j].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { x, i, 0 });
-                                break;
-                            }
-                            else if (board.Rows[j].Cells[i].Value != null && !containsEnemy(piece.Color, i, j))
-                            {
-                                future.Add(new int[] { i, j, 0 });
                                 break;
                             }
                         }
@@ -1567,19 +3848,14 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null)
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
-                            {
-                                future.Add(new int[] { x, i, 0 });
-                                break;
-                            }
-
                         }
 
                         //if the king wasn't killable through the spaces above, it clears the possible tiles and checks the next direction
@@ -1600,14 +3876,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { x, i, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[i].Cells[x].Value != null && containsEnemy(piece.Color, x, i))
-                            {
-                                future.Add(new int[] { x, i, 0 });
-                                break;
-                            }
-                            else if (board.Rows[i].Cells[x].Value != null && !containsEnemy(piece.Color, x, i))
+                            else if (board.Rows[i].Cells[x].Value != null)
                             {
                                 future.Add(new int[] { x, i, 0 });
                                 break;
@@ -1632,14 +3904,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
-                            {
-                                future.Add(new int[] { i, y, 0 });
-                                break;
-                            }
-                            else if (board.Rows[y].Cells[i].Value != null && !containsEnemy(piece.Color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1664,14 +3932,10 @@ namespace Chess
                             {
                                 threats.AddRange(possible);
                                 future.Add(new int[] { i, y, 0 });
+                                count++;
                                 break;
                             }
-                            else if (board.Rows[y].Cells[i].Value != null && containsEnemy(piece.Color, i, y))
-                            {
-                                future.Add(new int[] { i, y, 0 });
-                                break;
-                            }
-                            else if (board.Rows[i].Cells[y].Value != null && !containsEnemy(piece.Color, i, y))
+                            else if (board.Rows[y].Cells[i].Value != null)
                             {
                                 future.Add(new int[] { i, y, 0 });
                                 break;
@@ -1755,7 +4019,7 @@ namespace Chess
                     }
                 }
             }
-            return new List<int[]>[] { threats, future };
+            return new List<int[]>[] { threats, future, new List<int[]> { new int[] { count } } };
         }
 
         /// <summary>
@@ -1798,7 +4062,6 @@ namespace Chess
             }
         }
 
-        // TODO keep track of changed colors and reset them back rather than changing everything
         /// <summary>
         /// recolors a specific tile back to its original color
         /// </summary>
@@ -2572,7 +4835,7 @@ namespace Chess
                     if (piece.Color == Color.White)
                     {
                         //if king has not moved and the spaces between him and the rook are check free
-                        if (!piece.moved)
+                        if (!piece.Moved)
                         {
                             //KINGSIDE CASTLE
                             bool castle = true;
@@ -2581,7 +4844,7 @@ namespace Chess
                             Piece kingRook = new Piece();
                             foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 7)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 7)
                                 {
                                     kingRook = findRook;
                                 }
@@ -2614,7 +4877,7 @@ namespace Chess
                             Piece queenRook = new Piece();
                             foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 0)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 0)
                                 {
                                     queenRook = findRook;
                                 }
@@ -2643,7 +4906,7 @@ namespace Chess
                     else
                     {
                         //if king has not moved and the spaces between him and the rook are check free
-                        if (!piece.moved)
+                        if (!piece.Moved)
                         {
                             //KINGSIDE CASTLE
                             bool castle = true;
@@ -2652,7 +4915,7 @@ namespace Chess
                             Piece kingRook = new Piece();
                             foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 0)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 0)
                                 {
                                     kingRook = findRook;
                                 }
@@ -2685,7 +4948,7 @@ namespace Chess
                             Piece queenRook = new Piece();
                             foreach (Piece findRook in Pieces)
                             {
-                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 7)
+                                if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 7)
                                 {
                                     queenRook = findRook;
                                 }
@@ -4657,7 +6920,7 @@ namespace Chess
                     }
                     //CASTLE
                     //if king has not moved and the spaces between him and the rook are check free
-                    if (!piece.moved)
+                    if (!piece.Moved)
                     {
                         //KINGSIDE CASTLE
                         bool castle = true;
@@ -4666,7 +6929,7 @@ namespace Chess
                         Piece kingRook = new Piece();
                         foreach (Piece findRook in Pieces)
                         {
-                            if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 7)
+                            if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 7)
                             {
                                 kingRook = findRook;
                             }
@@ -4699,7 +6962,7 @@ namespace Chess
                         Piece queenRook = new Piece();
                         foreach (Piece findRook in Pieces)
                         {
-                            if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.moved && findRook.X == 0)
+                            if (findRook.Name == "rook" && findRook.Color == piece.Color && !findRook.Moved && findRook.X == 0)
                             {
                                 queenRook = findRook;
                             }
@@ -6043,31 +8306,32 @@ namespace Chess
             board.Rows[newy].Cells[newx].Value = piece.Icon;
 
 
-            Piece kill = new Piece();
-            if (killed)
-            {
-                try
-                {
-                    kill = Pieces.Find(k => k.X == newx && k.Y == newy && k != piece);
-                    testPieces.Remove(kill);
-                }
-                catch (ArgumentNullException)
-                {
+            //Piece kill = new Piece();
+            //if (killed)
+            //{
+            //    try
+            //    {
+            //        kill = new Piece(Pieces.Find(k => k.X == newx && k.Y == newy && k != piece));
+            //        testPieces.Remove(kill);
+            //    }
+            //    catch (ArgumentNullException)
+            //    {
 
-                }
-                //see if that spot would be a kill
-                foreach (Piece found in testPieces)
-                {
-                    if (found != piece && found.X == newx && found.Y == newy)
-                    {
-                        kill = found;
-                    }
-                }
-                if (kill.X != -1)
-                {
-                    testPieces.Remove(kill);
-                }
-            }
+            //    }
+            //    //see if that spot would be a kill
+            //    //foreach (Piece found in testPieces)
+            //    //{
+            //    //    if (found != piece && found.X == newx && found.Y == newy)
+            //    //    {
+            //    //        kill = found;
+            //    //        break;
+            //    //    }
+            //    //}
+            //    //if (kill.X != -1)
+            //    //{
+            //    //    testPieces.Remove(kill);
+            //    //}
+            //}
 
             //highlights all spaces
             foreach (Piece check in testPieces)
